@@ -17,7 +17,6 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -28,9 +27,11 @@ import org.springframework.web.client.RestTemplate;
 
 import lu.kbra.pclib.datastructure.pair.Pair;
 import lu.kbra.pclib.datastructure.pair.Pairs;
+import lu.kbra.restopolis_bots.db.data.RestaurantSiteData;
+import lu.kbra.restopolis_bots.db.table.RestaurantSiteTable;
+import lu.kbra.restopolis_bots.db.table.RestaurantTable;
 
 @Component
-@Profile("!noRestopolis")
 public class RestopolisFetcher {
 
 	public static final String DEBUG_PROPERTY = "restopolis.debug";
@@ -46,27 +47,18 @@ public class RestopolisFetcher {
 	@Value("${restopolis.cookies}")
 	private String cookies;
 
-	private List<String> targets;
+	@Autowired
+	private RestaurantSiteTable restaurantSiteTable;
+	@Autowired
+	private RestaurantTable restaurantTable;
 
 	@Scheduled(cron = "0 0 8 * * 1-5")
-	public void runDailyCheck() {
-		// this should only fetch and place in a db table
-
-		final List<Pair<String, Map<String, String>>> maps = new ArrayList<>();
-		for (final String key : targets) {
-			try {
-				final String cookie = cookies.replace("%TARGET%", key);
-				if (DEBUG) {
-					LOGGER.info("Fetching for: " + targetUrl + " with cookies: " + cookie);
-				}
-				final String html = fetchHtmlWithCookies(targetUrl, cookie);
-				maps.add(parseAndProcess(html));
-			} catch (IOException e) {
-				LOGGER.warning("Error fetching or parsing HTML: " + e.getMessage());
-			}
-		}
-
-		sendMessage(maps);
+	public void runDailyCheck() throws IOException {
+		final Document doc = Jsoup.parse(fetchHtmlWithCookies(targetUrl, null));
+		doc.select("div.restaurant-selector-list > a.restaurant-name").forEach(c -> {
+			final RestaurantSiteData restSite = restaurantSiteTable
+					.loadIfExistsElseInsert(new RestaurantSiteData(Integer.parseInt(c.attr("data-size"))));
+		});
 	}
 
 	public void sendMessage(List<Pair<String, Map<String, String>>> maps) {
@@ -93,7 +85,8 @@ public class RestopolisFetcher {
 
 	private String fetchHtmlWithCookies(String url, String cookieHeader) throws IOException {
 		final HttpHeaders headers = new HttpHeaders();
-		headers.set(HttpHeaders.COOKIE, cookieHeader);
+		if (cookieHeader != null)
+			headers.set(HttpHeaders.COOKIE, cookieHeader);
 
 		final HttpEntity<String> request = new HttpEntity<>(headers);
 
