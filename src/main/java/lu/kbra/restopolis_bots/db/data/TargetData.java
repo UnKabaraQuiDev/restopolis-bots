@@ -1,5 +1,8 @@
 package lu.kbra.restopolis_bots.db.data;
 
+import java.time.DayOfWeek;
+import java.util.List;
+
 import lu.kbra.pclib.db.autobuild.column.AutoIncrement;
 import lu.kbra.pclib.db.autobuild.column.Column;
 import lu.kbra.pclib.db.autobuild.column.PrimaryKey;
@@ -15,5 +18,8 @@ public class TargetData implements DataBaseEntry {
 
 	@Column(length = 32)
 	protected TargetPlatform targetPlatform;
+	
+	@Column
+	protected List<DayOfWeek> days;
 
 }

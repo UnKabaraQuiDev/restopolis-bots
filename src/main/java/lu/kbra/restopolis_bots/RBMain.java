@@ -27,6 +27,7 @@ public class RBMain {
 					# db.proto=mysql
 					db.port=3306
 					db.name=restopolis_bots
+					discord.token=
 										""");
 			System.out.println("Created empty config to: " + CONFIG_FILE);
 			return;

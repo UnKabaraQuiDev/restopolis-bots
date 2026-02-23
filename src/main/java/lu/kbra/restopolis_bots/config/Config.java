@@ -11,6 +11,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,9 +21,15 @@ import lu.kbra.pclib.db.connector.DataBaseConnectorFactory;
 import lu.kbra.pclib.db.connector.MySQLDataBaseConnector;
 import lu.kbra.restopolis_bots.data.TargetPlatform;
 import lu.kbra.restopolis_bots.db.table.discord.TargetPlatformTable;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.utils.ChunkingFilter;
+import net.dv8tion.jda.api.utils.MemberCachePolicy;
 
 @Configuration
-@EnableConfigurationProperties(DbConfigData.class)
+@EnableScheduling
+@EnableConfigurationProperties({ DbConfigData.class, DiscordConfigData.class })
 public class Config {
 
 	@Lazy
@@ -32,7 +40,8 @@ public class Config {
 
 	@Bean
 	public DataBaseConnectorFactory dbConnectorFactory(final DbConfigData config) {
-		return () -> new MySQLDataBaseConnector(config.getUsername(), config.getPassword(), config.getHost(), config.getPort());
+		return () -> new MySQLDataBaseConnector(config.getUsername(), config.getPassword(), config.getHost(),
+				config.getPort());
 	}
 
 	@Bean
@@ -47,7 +56,16 @@ public class Config {
 
 	@Bean
 	public RestTemplate restTemplate() {
-		return new RestTemplate();
+		final RestTemplate restTemplate = new RestTemplate();
+		restTemplate.setRequestFactory(new SimpleClientHttpRequestFactory());
+		return restTemplate;
+	}
+
+	@Bean
+	public JDA jdaConfig(DiscordConfigData config) throws InterruptedException {
+		final JDA jda = JDABuilder.createDefault(config.getToken()).setChunkingFilter(ChunkingFilter.ALL).build();
+
+		return jda;
 	}
 
 }

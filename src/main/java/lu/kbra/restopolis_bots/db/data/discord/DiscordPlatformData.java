@@ -25,4 +25,43 @@ public class DiscordPlatformData implements TargetPlatformData {
 	@Nullable
 	protected String roleId;
 
+	public DiscordPlatformData() {
+	}
+
+	public DiscordPlatformData(long id) {
+		this.id = id;
+	}
+
+	public DiscordPlatformData(String serverId) {
+		this.serverId = serverId;
+	}
+
+	public DiscordPlatformData(String serverId, String channelId, String roleId) {
+		this.serverId = serverId;
+		this.channelId = channelId;
+		this.roleId = roleId;
+	}
+
+	public long getId() {
+		return id;
+	}
+
+	public String getServerId() {
+		return serverId;
+	}
+
+	public String getChannelId() {
+		return channelId;
+	}
+
+	public String getRoleId() {
+		return roleId;
+	}
+
+	@Override
+	public String toString() {
+		return "DiscordPlatformData@" + System.identityHashCode(this) + " [id=" + id + ", serverId=" + serverId
+				+ ", channelId=" + channelId + ", roleId=" + roleId + "]";
+	}
+
 }

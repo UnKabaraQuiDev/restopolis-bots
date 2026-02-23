@@ -23,4 +23,34 @@ public class MealData implements DataBaseEntry {
 	@Unique
 	protected LocalDate date;
 
+	public MealData() {
+	}
+
+	public MealData(long id) {
+		this.id = id;
+	}
+
+	public MealData(long restaurantId, LocalDate date) {
+		this.restaurantId = restaurantId;
+		this.date = date;
+	}
+
+	public long getId() {
+		return id;
+	}
+
+	public long getRestaurantId() {
+		return restaurantId;
+	}
+
+	public LocalDate getDate() {
+		return date;
+	}
+
+	@Override
+	public String toString() {
+		return "MealData@" + System.identityHashCode(this) + " [id=" + id + ", restaurantId=" + restaurantId + ", date="
+				+ date + "]";
+	}
+
 }

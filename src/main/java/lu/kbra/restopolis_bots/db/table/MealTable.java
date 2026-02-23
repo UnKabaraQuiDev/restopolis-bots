@@ -7,7 +7,7 @@ import lu.kbra.pclib.db.table.DeferredDataBaseTable;
 import lu.kbra.restopolis_bots.db.data.MealData;
 
 @Component
-public abstract class MealTable extends DeferredDataBaseTable<MealData> {
+public class MealTable extends DeferredDataBaseTable<MealData> {
 
 	public MealTable(DataBase dataBase) {
 		super(dataBase);

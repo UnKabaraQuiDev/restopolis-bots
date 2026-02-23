@@ -16,9 +16,44 @@ public class RestaurantData implements DataBaseEntry {
 	@Column(length = 64)
 	@Unique
 	protected String name;
-	
+
 	@Column
 	@ForeignKey(table = RestaurantSiteTable.class)
 	protected long restaurantSiteId;
+
+	public RestaurantData() {
+	}
+
+	public RestaurantData(long id) {
+		this.id = id;
+	}
+
+	public RestaurantData(String name) {
+		this.name = name;
+	}
+
+	public RestaurantData(long id, String name, long restaurantSiteId) {
+		this.id = id;
+		this.name = name;
+		this.restaurantSiteId = restaurantSiteId;
+	}
+
+	public long getId() {
+		return id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public long getRestaurantSiteId() {
+		return restaurantSiteId;
+	}
+
+	@Override
+	public String toString() {
+		return "RestaurantData@" + System.identityHashCode(this) + " [id=" + id + ", name=" + name
+				+ ", restaurantSiteId=" + restaurantSiteId + "]";
+	}
 
 }
