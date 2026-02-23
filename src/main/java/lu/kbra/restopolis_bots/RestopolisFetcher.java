@@ -45,17 +45,15 @@ public class RestopolisFetcher {
 	private String targetUrl;
 	@Value("${restopolis.cookies}")
 	private String cookies;
-	@Value("${restopolis.targets}")
-	private String targets;
-	@Value("${restopolis.wants}")
-	private String wanted;
+
+	private List<String> targets;
 
 	@Scheduled(cron = "0 0 8 * * 1-5")
 	public void runDailyCheck() {
 		// this should only fetch and place in a db table
 
 		final List<Pair<String, Map<String, String>>> maps = new ArrayList<>();
-		for (final String key : targets.split(",")) {
+		for (final String key : targets) {
 			try {
 				final String cookie = cookies.replace("%TARGET%", key);
 				if (DEBUG) {
@@ -73,7 +71,7 @@ public class RestopolisFetcher {
 
 	public void sendMessage(List<Pair<String, Map<String, String>>> maps) {
 		final StringBuilder sb = new StringBuilder();
-		final String[] wantedList = wanted.split(",");
+		final String[] wantedList = new String[0];
 
 		final Instant now = Instant.now();
 		final long unixSeconds = now.getEpochSecond();
@@ -135,8 +133,14 @@ public class RestopolisFetcher {
 			}
 		}
 
-		return Pairs.readOnly(restName, map.entrySet().parallelStream().collect(Collectors.toMap(e -> e.getKey(),
-				e -> e.getValue().stream().map(c -> "* " + c).collect(Collectors.joining("\n")))));
+		return Pairs
+				.readOnly(restName,
+						map
+								.entrySet()
+								.parallelStream()
+								.collect(Collectors
+										.toMap(e -> e.getKey(),
+												e -> e.getValue().stream().map(c -> "* " + c).collect(Collectors.joining("\n")))));
 	}
 
 }
