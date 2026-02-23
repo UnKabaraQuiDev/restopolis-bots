@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import lu.kbra.pclib.db.base.DataBase;
+import lu.kbra.pclib.db.loader.BufferedPagedEnumeration;
 import lu.kbra.pclib.db.table.DeferredDataBaseTable;
 import lu.kbra.restopolis_bots.data.TargetPlatform;
 import lu.kbra.restopolis_bots.db.data.TargetData;
@@ -18,9 +19,13 @@ public class TargetTable extends DeferredDataBaseTable<TargetData> {
 	@Autowired
 	@Lazy
 	private Map<TargetPlatform, TargetPlatformTable<?>> platformTables;
-	
+
 	public TargetTable(DataBase dataBase) {
 		super(dataBase);
+	}
+
+	public BufferedPagedEnumeration<TargetData> all(TargetPlatform targetPlatform) {
+		return new BufferedPagedEnumeration<>(20, this, cb -> cb.match("target_platform", "=", targetPlatform));
 	}
 
 }

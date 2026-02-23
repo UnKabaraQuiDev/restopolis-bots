@@ -18,10 +18,10 @@ public class DiscordPlatformData implements TargetPlatformData {
 	@Unique
 	protected String serverId;
 
-	@Column
+	@Column(length = 20)
 	protected String channelId;
 
-	@Column
+	@Column(length = 20)
 	@Nullable
 	protected String roleId;
 

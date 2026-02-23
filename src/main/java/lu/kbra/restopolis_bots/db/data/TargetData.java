@@ -18,8 +18,38 @@ public class TargetData implements DataBaseEntry {
 
 	@Column(length = 32)
 	protected TargetPlatform targetPlatform;
-	
+
 	@Column
 	protected List<DayOfWeek> days;
+
+	public TargetData() {
+	}
+
+	public TargetData(long id) {
+		this.id = id;
+	}
+
+	public TargetData(TargetPlatform targetPlatform, List<DayOfWeek> days) {
+		this.targetPlatform = targetPlatform;
+		this.days = days;
+	}
+
+	public long getId() {
+		return id;
+	}
+
+	public TargetPlatform getTargetPlatform() {
+		return targetPlatform;
+	}
+
+	public List<DayOfWeek> getDays() {
+		return days;
+	}
+
+	@Override
+	public String toString() {
+		return "TargetData@" + System.identityHashCode(this) + " [id=" + id + ", targetPlatform=" + targetPlatform
+				+ ", days=" + days + "]";
+	}
 
 }

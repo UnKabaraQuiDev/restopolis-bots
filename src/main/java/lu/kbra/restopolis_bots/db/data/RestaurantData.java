@@ -1,5 +1,7 @@
 package lu.kbra.restopolis_bots.db.data;
 
+import java.util.Objects;
+
 import lu.kbra.pclib.db.autobuild.column.Column;
 import lu.kbra.pclib.db.autobuild.column.ForeignKey;
 import lu.kbra.pclib.db.autobuild.column.PrimaryKey;
@@ -24,36 +26,51 @@ public class RestaurantData implements DataBaseEntry {
 	public RestaurantData() {
 	}
 
-	public RestaurantData(long id) {
+	public RestaurantData(final long id) {
 		this.id = id;
 	}
 
-	public RestaurantData(String name) {
+	public RestaurantData(final String name) {
 		this.name = name;
 	}
 
-	public RestaurantData(long id, String name, long restaurantSiteId) {
+	public RestaurantData(final long id, final String name, final long restaurantSiteId) {
 		this.id = id;
 		this.name = name;
 		this.restaurantSiteId = restaurantSiteId;
 	}
 
 	public long getId() {
-		return id;
+		return this.id;
 	}
 
 	public String getName() {
-		return name;
+		return this.name;
 	}
 
 	public long getRestaurantSiteId() {
-		return restaurantSiteId;
+		return this.restaurantSiteId;
 	}
 
 	@Override
 	public String toString() {
-		return "RestaurantData@" + System.identityHashCode(this) + " [id=" + id + ", name=" + name
-				+ ", restaurantSiteId=" + restaurantSiteId + "]";
+		return "RestaurantData@" + System.identityHashCode(this) + " [id=" + this.id + ", name=" + this.name
+				+ ", restaurantSiteId=" + this.restaurantSiteId + "]";
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(this.id);
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj)
+			return true;
+		if ((obj == null) || (this.getClass() != obj.getClass()))
+			return false;
+		final RestaurantData other = (RestaurantData) obj;
+		return this.id == other.id;
 	}
 
 }

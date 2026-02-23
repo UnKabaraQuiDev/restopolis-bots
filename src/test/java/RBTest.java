@@ -7,6 +7,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import lu.kbra.restopolis_bots.DiscordSchedule;
 import lu.kbra.restopolis_bots.RBMain;
 import lu.kbra.restopolis_bots.RestopolisFetcher;
 import lu.rescue_rush.spring.jda.DiscordSenderService;
@@ -20,6 +21,8 @@ public class RBTest {
 
 	@Autowired(required = false)
 	private DiscordSenderService discordSenderService;
+	@Autowired(required = false)
+	private DiscordSchedule discordSchedule;
 
 	@BeforeAll
 	public void waitForJDA() {
@@ -47,6 +50,11 @@ public class RBTest {
 	public void fetchMenus() {
 		System.err.println("fetching menus");
 		restopolisFetcher.runMenuFetch();
+	}
+
+	@Test
+	public void testMessage() {
+		discordSchedule.runTargets();
 	}
 
 }

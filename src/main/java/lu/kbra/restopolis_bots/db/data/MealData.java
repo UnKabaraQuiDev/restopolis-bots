@@ -4,9 +4,11 @@ import java.time.LocalDate;
 
 import lu.kbra.pclib.db.autobuild.column.AutoIncrement;
 import lu.kbra.pclib.db.autobuild.column.Column;
+import lu.kbra.pclib.db.autobuild.column.ForeignKey;
 import lu.kbra.pclib.db.autobuild.column.PrimaryKey;
 import lu.kbra.pclib.db.autobuild.column.Unique;
 import lu.kbra.pclib.db.impl.DataBaseEntry;
+import lu.kbra.restopolis_bots.db.table.RestaurantTable;
 
 public class MealData implements DataBaseEntry {
 
@@ -17,6 +19,7 @@ public class MealData implements DataBaseEntry {
 
 	@Column
 	@Unique
+	@ForeignKey(table = RestaurantTable.class)
 	protected long restaurantId;
 
 	@Column

@@ -19,4 +19,26 @@ public class TargetRestaurantSectionData implements DataBaseEntry {
 	@ForeignKey(table = RestaurantSectionTable.class)
 	protected long restaurantSectionId;
 
+	public TargetRestaurantSectionData() {
+	}
+
+	public TargetRestaurantSectionData(long targetId, long restaurantSectionId) {
+		this.targetId = targetId;
+		this.restaurantSectionId = restaurantSectionId;
+	}
+
+	public long getTargetId() {
+		return targetId;
+	}
+
+	public long getRestaurantSectionId() {
+		return restaurantSectionId;
+	}
+
+	@Override
+	public String toString() {
+		return "TargetRestaurantSectionData@" + System.identityHashCode(this) + " [targetId=" + targetId
+				+ ", restaurantSectionId=" + restaurantSectionId + "]";
+	}
+
 }
