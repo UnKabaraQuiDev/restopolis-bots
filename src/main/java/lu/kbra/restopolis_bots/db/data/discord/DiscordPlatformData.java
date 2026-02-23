@@ -42,6 +42,7 @@ public class DiscordPlatformData implements TargetPlatformData {
 		this.roleId = roleId;
 	}
 
+	@Override
 	public long getId() {
 		return id;
 	}

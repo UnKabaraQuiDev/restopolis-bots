@@ -1,0 +1,54 @@
+package lu.kbra.restopolis_bots.cmd;
+
+import java.time.DayOfWeek;
+import java.time.format.TextStyle;
+import java.util.Locale;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import lu.kbra.restopolis_bots.db.data.TargetData;
+import lu.kbra.restopolis_bots.db.data.discord.DiscordPlatformData;
+import lu.kbra.restopolis_bots.db.table.TargetTable;
+import lu.kbra.restopolis_bots.db.table.discord.DiscordPlatformTable;
+import lu.rescue_rush.spring.jda.menu.DiscordStringMenu;
+import lu.rescue_rush.spring.jda.menu.DiscordStringMenuExecutor;
+import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
+import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
+
+@Component("days_select")
+public class DaySelectMenu implements DiscordStringMenu, DiscordStringMenuExecutor {
+
+	private String beanName;
+
+	@Autowired
+	private DiscordPlatformTable discordPlatformTable;
+	@Autowired
+	private TargetTable targetTable;
+
+	@Override
+	public void execute(StringSelectInteractionEvent event) {
+		event.deferReply().queue();
+		final DiscordPlatformData discordPlatformData = discordPlatformTable.byServer(event.getGuild().getIdLong());
+		final TargetData targetData = targetTable.byId(discordPlatformData.getId());
+		targetData.setDays(event.getSelectedOptions().stream().map(c -> DayOfWeek.valueOf(c.getValue())).toList());
+		targetTable.updateAndReload(targetData);
+		event.getHook().sendMessage("Updated days to: " + targetData.getDays()).setEphemeral(true).queue();
+	}
+
+	@Override
+	public StringSelectMenu build() {
+		final StringSelectMenu.Builder a = StringSelectMenu.create(beanName).setPlaceholder("Select the days")
+				.setMinValues(0).setMaxValues(7);
+		for (DayOfWeek dow : DayOfWeek.values()) {
+			a.addOption(dow.getDisplayName(TextStyle.FULL, Locale.ENGLISH), dow.name());
+		}
+		return a.build();
+	}
+
+	@Override
+	public void setBeanName(String name) {
+		this.beanName = name;
+	}
+
+}

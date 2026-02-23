@@ -46,6 +46,10 @@ public class TargetData implements DataBaseEntry {
 		return days;
 	}
 
+	public void setDays(List<DayOfWeek> days) {
+		this.days = days;
+	}
+
 	@Override
 	public String toString() {
 		return "TargetData@" + System.identityHashCode(this) + " [id=" + id + ", targetPlatform=" + targetPlatform
