@@ -2,7 +2,6 @@ package lu.kbra.restopolis_bots.cmd;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -123,8 +122,9 @@ public class SelectCmd implements SlashCommandExecutor, SlashCommandAutocomplete
 									.insertAndReload(new TargetData(TargetPlatform.DISCORD, Collections.emptyList()));
 							return discordPlatformTable.insertAndReload(new DiscordPlatformData(targetData.getId(),
 									event.isFromGuild() ? event.getGuild().getId() : event.getChannelId(),
-									event.getChannelId(),
-									null));
+									event.isFromGuild() ? event.getChannelId() : event.getUser().getId(),
+									null,
+									!event.isFromGuild()));
 						});
 
 				targetRestaurantSectionTable.byTarget(discordPlatformData.getId())
@@ -186,6 +186,8 @@ public class SelectCmd implements SlashCommandExecutor, SlashCommandAutocomplete
 		@Autowired
 		private RestaurantTable restaurantTable;
 		@Autowired
+		private RestaurantSectionTable restaurantSectionTable;
+		@Autowired
 		private DiscordPlatformTable discordPlatformTable;
 		@Autowired
 		private TargetRestaurantSectionTable targetRestaurantSectionTable;
@@ -199,8 +201,7 @@ public class SelectCmd implements SlashCommandExecutor, SlashCommandAutocomplete
 		public void execute(SlashCommandInteractionEvent event) {
 			event.deferReply(true).queue();
 			final String restaurantName = event.getOption("restaurant").getAsString();
-			final Optional<RestaurantData> restaurant = restaurantTable.byName(restaurantName);
-			if (restaurant.isPresent()) {
+			restaurantTable.byName(restaurantName).ifPresentOrElse(restaurant -> {
 				final DiscordPlatformData discordPlatformData = discordPlatformTable
 						.byServer(event.isFromGuild() ? event.getGuild().getIdLong() : event.getChannelIdLong())
 						.orElseGet(() -> {
@@ -208,8 +209,9 @@ public class SelectCmd implements SlashCommandExecutor, SlashCommandAutocomplete
 									.insertAndReload(new TargetData(TargetPlatform.DISCORD, Collections.emptyList()));
 							return discordPlatformTable.insertAndReload(new DiscordPlatformData(targetData.getId(),
 									event.isFromGuild() ? event.getGuild().getId() : event.getChannelId(),
-									event.getChannelId(),
-									null));
+									event.isFromGuild() ? event.getChannelId() : event.getUser().getId(),
+									null,
+									!event.isFromGuild()));
 						});
 
 				final List<Long> restaurantSectionDatas = targetRestaurantSectionTable.byTarget(discordPlatformData.getId())
@@ -217,14 +219,21 @@ public class SelectCmd implements SlashCommandExecutor, SlashCommandAutocomplete
 						.map(TargetRestaurantSectionData::getRestaurantSectionId)
 						.toList();
 
-				event.getHook()
-						.sendMessage("Restaurant __" + restaurantName + "__:")
-						.setEphemeral(true)
-						.addComponents(ActionRow.of(restaurantSectionSelectMenu.build(restaurant.get(), restaurantSectionDatas)))
-						.queue();
-			} else {
+				if (restaurantSectionTable.countUniques(new RestaurantSectionData(restaurant.getId(), null)) > 0) {
+					event.getHook()
+							.sendMessage("Restaurant __" + restaurantName + "__:")
+							.setEphemeral(true)
+							.addComponents(ActionRow.of(restaurantSectionSelectMenu.build(restaurant, restaurantSectionDatas)))
+							.queue();
+				} else {
+					event.getHook()
+							.sendMessage("Restaurant __" + restaurantName + "__: *Doesn't serve anything ?*")
+							.setEphemeral(true)
+							.queue();
+				}
+			}, () -> {
 				event.getHook().sendMessage("No restaurant with name: " + restaurantName + ", found.").setEphemeral(true).queue();
-			}
+			});
 		}
 
 		@Override

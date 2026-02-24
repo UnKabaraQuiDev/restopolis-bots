@@ -63,54 +63,65 @@ public class DiscordSchedule {
 		final DayOfWeek dayOfWeek = today.getDayOfWeek();
 
 		targetTable.all(TargetPlatform.DISCORD).forEachRemaining(target -> {
-			if (target.getDays() == null || target.getDays().isEmpty() || !target.getDays().contains(dayOfWeek)) {
-				return;
+			try {
+				if (target.getDays() == null || target.getDays().isEmpty() || !target.getDays().contains(dayOfWeek)) {
+					return;
+				}
+
+				final DiscordPlatformData discordPlatformData = discordPlatformTable.loadIfExists(new DiscordPlatformData(target.getId()))
+						.orElse(null);
+				if (discordPlatformData == null) {
+					return;
+				}
+				if (discordPlatformData.isDm()) {
+					jda.openPrivateChannelById(discordPlatformData.getUserId()).complete();
+				}
+				final MessageChannel channel = discordPlatformData.isDm() ? jda.getPrivateChannelById(discordPlatformData.getChannelId())
+						: jda.getTextChannelById(discordPlatformData.getChannelId());
+				final Role role = !discordPlatformData.isDm() && discordPlatformData.getRoleId() != null
+						? jda.getRoleById(discordPlatformData.getRoleId())
+						: null;
+				if (channel == null) {
+					return;
+				}
+
+				final List<TargetRestaurantSectionData> targetRestaurantSectionDatas = targetRestaurantSectionTable
+						.byTarget(target.getId());
+				if (targetRestaurantSectionDatas.isEmpty()) {
+					return;
+				}
+				final List<RestaurantSectionData> restaurantSectionDatas = targetRestaurantSectionDatas.stream()
+						.map(c -> restaurantSectionTable.byId(c.getRestaurantSectionId()))
+						.toList();
+
+				final Map<RestaurantData, Map<RestaurantSectionData, MealSectionData>> map = new HashMap<>();
+
+				restaurantSectionDatas.forEach(restaurantSectionData -> {
+					final RestaurantData restaurantData = restaurantTable.byId(restaurantSectionData.getRestaurantId());
+					final MealData mealData = mealTable.todayByRestaurant(restaurantSectionData.getRestaurantId());
+					final MealSectionData mealSectionData = mealSectionTable.byMealAndRestaurantSection(mealData.getId(),
+							restaurantSectionData.getId());
+
+					map.computeIfAbsent(restaurantData, k -> new HashMap<>());
+					map.get(restaurantData).put(restaurantSectionData, mealSectionData);
+				});
+
+				String msg = buildMessage(map.entrySet()
+						.stream()
+						.collect(Collectors.toMap(e -> e.getKey().getName(),
+								e -> e.getValue()
+										.entrySet()
+										.stream()
+										.collect(Collectors.toMap(e2 -> e2.getKey().getName(), e2 -> e2.getValue().getContent())))));
+
+				if (role != null) {
+					msg = role.getAsMention() + "\n" + msg;
+				}
+				channel.sendMessage(msg).queue();
+			} catch (Exception e) {
+				System.err.println(target);
+				e.printStackTrace();
 			}
-
-			final DiscordPlatformData discordPlatformData = discordPlatformTable.load(new DiscordPlatformData(target.getId()));
-			System.err.println("discordPlatformData " + discordPlatformData);
-			final MessageChannel channel = discordPlatformData.isDm() ? jda.getPrivateChannelById(discordPlatformData.getChannelId())
-					: jda.getTextChannelById(discordPlatformData.getChannelId());
-			final Role role = !discordPlatformData.isDm() && discordPlatformData.getRoleId() != null
-					? jda.getRoleById(discordPlatformData.getRoleId())
-					: null;
-			System.err.println("channel " + channel);
-			if (channel == null) {
-				return;
-			}
-
-			final List<TargetRestaurantSectionData> targetRestaurantSectionDatas = targetRestaurantSectionTable.byTarget(target.getId());
-			if (targetRestaurantSectionDatas.isEmpty()) {
-				return;
-			}
-			final List<RestaurantSectionData> restaurantSectionDatas = targetRestaurantSectionDatas.stream()
-					.map(c -> restaurantSectionTable.byId(c.getRestaurantSectionId()))
-					.toList();
-
-			final Map<RestaurantData, Map<RestaurantSectionData, MealSectionData>> map = new HashMap<>();
-
-			restaurantSectionDatas.forEach(restaurantSectionData -> {
-				final RestaurantData restaurantData = restaurantTable.byId(restaurantSectionData.getRestaurantId());
-				final MealData mealData = mealTable.todayByRestaurant(restaurantSectionData.getRestaurantId());
-				final MealSectionData mealSectionData = mealSectionTable.byMealAndRestaurantSection(mealData.getId(),
-						restaurantSectionData.getId());
-
-				map.computeIfAbsent(restaurantData, k -> new HashMap<>());
-				map.get(restaurantData).put(restaurantSectionData, mealSectionData);
-			});
-
-			String msg = buildMessage(map.entrySet()
-					.stream()
-					.collect(Collectors.toMap(e -> e.getKey().getName(),
-							e -> e.getValue()
-									.entrySet()
-									.stream()
-									.collect(Collectors.toMap(e2 -> e2.getKey().getName(), e2 -> e2.getValue().getContent())))));
-
-			if (role != null) {
-				msg = role.getAsMention() + "\n" + msg;
-			}
-			channel.sendMessage(msg).queue();
 		});
 	}
 

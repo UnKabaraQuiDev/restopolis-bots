@@ -43,8 +43,9 @@ public class RoleCmd implements SlashCommandExecutor {
 							.insertAndReload(new TargetData(TargetPlatform.DISCORD, Collections.emptyList()));
 					return discordPlatformTable.insertAndReload(new DiscordPlatformData(targetData.getId(),
 							event.isFromGuild() ? event.getGuild().getId() : event.getChannelId(),
-							event.getChannelId(),
-							null));
+							event.isFromGuild() ? event.getChannelId() : event.getUser().getId(),
+							null,
+							!event.isFromGuild()));
 				});
 		event.getHook()
 				.sendMessage("Select your role:")
@@ -56,7 +57,7 @@ public class RoleCmd implements SlashCommandExecutor {
 
 	@Override
 	public String description() {
-		return "Select the days you wish to receive the notification.";
+		return "Select the role that'll be pinged in the notification.";
 	}
 
 }

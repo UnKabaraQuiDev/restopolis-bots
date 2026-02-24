@@ -40,8 +40,9 @@ public class DaySelectMenu implements DiscordStringMenu, DiscordStringMenuExecut
 							.insertAndReload(new TargetData(TargetPlatform.DISCORD, Collections.emptyList()));
 					return discordPlatformTable.insertAndReload(new DiscordPlatformData(targetData.getId(),
 							event.isFromGuild() ? event.getGuild().getId() : event.getChannelId(),
-							event.getChannelId(),
-							null));
+							event.isFromGuild() ? event.getChannelId() : event.getUser().getId(),
+							null,
+							!event.isFromGuild()));
 				});
 
 		final TargetData targetData = targetTable.byId(discordPlatformData);

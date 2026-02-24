@@ -1,9 +1,7 @@
 package lu.kbra.restopolis_bots.db.data.discord;
 
 import lu.kbra.pclib.db.autobuild.column.Column;
-import lu.kbra.pclib.db.autobuild.column.DefaultValue;
 import lu.kbra.pclib.db.autobuild.column.ForeignKey;
-import lu.kbra.pclib.db.autobuild.column.Generated;
 import lu.kbra.pclib.db.autobuild.column.Nullable;
 import lu.kbra.pclib.db.autobuild.column.PrimaryKey;
 import lu.kbra.pclib.db.autobuild.column.Unique;
@@ -16,10 +14,12 @@ public class DiscordPlatformData implements TargetPlatformData {
 	@ForeignKey(table = TargetTable.class)
 	protected long id;
 
+	// channel id for dm
 	@Column(length = 20)
 	@Unique
 	protected String serverId;
 
+	// user id for dm
 	@Column(length = 20)
 	protected String channelId;
 
@@ -28,9 +28,7 @@ public class DiscordPlatformData implements TargetPlatformData {
 	protected String roleId;
 
 	@Column
-	@Generated
-	@DefaultValue("server_id = channel_id")
-	protected boolean dm;
+	protected boolean dm = false;
 
 	public DiscordPlatformData() {
 	}
@@ -43,11 +41,12 @@ public class DiscordPlatformData implements TargetPlatformData {
 		this.serverId = serverId;
 	}
 
-	public DiscordPlatformData(long id, String serverId, String channelId, String roleId) {
+	public DiscordPlatformData(long id, String serverId, String channelId, String roleId, boolean dm) {
 		this.id = id;
 		this.serverId = serverId;
 		this.channelId = channelId;
 		this.roleId = roleId;
+		this.dm = dm;
 	}
 
 	@Override
@@ -56,14 +55,20 @@ public class DiscordPlatformData implements TargetPlatformData {
 	}
 
 	public String getServerId() {
+		if (dm) {
+			throw new UnsupportedOperationException("Only usable in Server: " + toString());
+		}
 		return serverId;
 	}
 
 	public String getChannelId() {
-		return channelId;
+		return dm ? serverId : channelId;
 	}
 
 	public String getRoleId() {
+		if (dm) {
+			throw new UnsupportedOperationException("Only usable in Server: " + toString());
+		}
 		return roleId;
 	}
 
@@ -71,12 +76,23 @@ public class DiscordPlatformData implements TargetPlatformData {
 		return dm;
 	}
 
+	public String getUserId() {
+		if (!dm) {
+			throw new UnsupportedOperationException("Only usable in DM: " + toString());
+		}
+		return channelId;
+	}
+
 	public void setRoleId(String roleId) {
 		this.roleId = roleId;
 	}
 
 	public void setChannelId(String channelId) {
-		this.channelId = channelId;
+		if (dm) {
+			this.serverId = channelId;
+		} else {
+			this.channelId = channelId;
+		}
 	}
 
 	@Override

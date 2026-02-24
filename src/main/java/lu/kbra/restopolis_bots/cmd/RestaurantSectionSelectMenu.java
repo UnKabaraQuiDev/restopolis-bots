@@ -49,8 +49,9 @@ public class RestaurantSectionSelectMenu implements DiscordStringMenu, DiscordSt
 							.insertAndReload(new TargetData(TargetPlatform.DISCORD, Collections.emptyList()));
 					return discordPlatformTable.insertAndReload(new DiscordPlatformData(targetData.getId(),
 							event.isFromGuild() ? event.getGuild().getId() : event.getChannelId(),
-							event.getChannelId(),
-							null));
+							event.isFromGuild() ? event.getChannelId() : event.getUser().getId(),
+							null,
+							!event.isFromGuild()));
 				});
 
 		event.getSelectedOptions().forEach(c -> {
@@ -85,6 +86,9 @@ public class RestaurantSectionSelectMenu implements DiscordStringMenu, DiscordSt
 
 	public StringSelectMenu build(final RestaurantData restaurant, List<Long> selected) {
 		final List<RestaurantSectionData> all = restaurantSectionTable.byRestaurant(restaurant.getId());
+		if(all.isEmpty()) {
+			return null;
+		}
 		final StringSelectMenu.Builder a = StringSelectMenu.create(beanName)
 				.setPlaceholder("Select the sections")
 				.setMinValues(0)

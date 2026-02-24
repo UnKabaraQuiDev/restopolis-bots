@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import lu.kbra.pclib.db.base.DataBase;
 import lu.kbra.pclib.db.loader.BufferedPagedEnumeration;
+import lu.kbra.pclib.db.table.DBException;
 import lu.kbra.pclib.db.table.DeferredDataBaseTable;
 import lu.kbra.restopolis_bots.data.TargetPlatform;
 import lu.kbra.restopolis_bots.db.data.TargetData;
@@ -47,4 +48,9 @@ public class TargetTable extends DeferredDataBaseTable<TargetData> {
 		return super.updateAndReload(data);
 	}
 
+	@Override
+	public TargetData insertAndReload(TargetData data) throws DBException {
+		// TODO Auto-generated method stub
+		return super.insertAndReload(data);
+	}
 }
