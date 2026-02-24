@@ -36,7 +36,8 @@ public class DiscordPlatformData implements TargetPlatformData {
 		this.serverId = serverId;
 	}
 
-	public DiscordPlatformData(String serverId, String channelId, String roleId) {
+	public DiscordPlatformData(long id, String serverId, String channelId, String roleId) {
+		this.id = id;
 		this.serverId = serverId;
 		this.channelId = channelId;
 		this.roleId = roleId;
@@ -61,8 +62,8 @@ public class DiscordPlatformData implements TargetPlatformData {
 
 	@Override
 	public String toString() {
-		return "DiscordPlatformData@" + System.identityHashCode(this) + " [id=" + id + ", serverId=" + serverId
-				+ ", channelId=" + channelId + ", roleId=" + roleId + "]";
+		return "DiscordPlatformData@" + System.identityHashCode(this) + " [id=" + id + ", serverId=" + serverId + ", channelId=" + channelId
+				+ ", roleId=" + roleId + "]";
 	}
 
 }

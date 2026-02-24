@@ -32,7 +32,6 @@ public class RBTest {
 	}
 
 	@Test
-	@Disabled
 	public void testSite() throws IOException {
 		System.err.println("fetching sites");
 		restopolisFetcher.runListFetch();
@@ -46,13 +45,13 @@ public class RBTest {
 	}
 
 	@Test
-	@Disabled
 	public void fetchMenus() {
 		System.err.println("fetching menus");
 		restopolisFetcher.runMenuFetch();
 	}
 
 	@Test
+	@Disabled
 	public void testMessage() {
 		discordSchedule.runTargets();
 	}

@@ -1,5 +1,7 @@
 package lu.kbra.restopolis_bots.db.table;
 
+import java.util.List;
+
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +19,10 @@ public class RestaurantSectionTable extends DeferredDataBaseTable<RestaurantSect
 	@Cacheable(cacheNames = "restaurant-section.id")
 	public RestaurantSectionData byId(long restaurantSectionId) {
 		return super.load(new RestaurantSectionData(restaurantSectionId));
+	}
+
+	public List<RestaurantSectionData> byRestaurant(long id) {
+		return super.loadByUnique(new RestaurantSectionData(id, null));
 	}
 
 }

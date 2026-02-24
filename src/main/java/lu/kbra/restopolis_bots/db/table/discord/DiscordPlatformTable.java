@@ -1,5 +1,7 @@
 package lu.kbra.restopolis_bots.db.table.discord;
 
+import java.util.Optional;
+
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
@@ -23,8 +25,8 @@ public class DiscordPlatformTable extends DeferredDataBaseTable<DiscordPlatformD
 	}
 
 	@Cacheable(cacheNames = "discordPlatform.serverId")
-	public DiscordPlatformData byServer(long serverId) {
-		return super.loadUnique(new DiscordPlatformData(Long.toString(serverId)));
+	public Optional<DiscordPlatformData> byServer(long serverId) {
+		return super.loadUniqueIfExists(new DiscordPlatformData(Long.toString(serverId)));
 	}
 
 	@CacheEvict(cacheNames = "discordPlatform.serverId", key = "#data.getServerId()")

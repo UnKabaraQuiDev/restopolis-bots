@@ -1,6 +1,11 @@
 <factorypath>
+    <factorypathentry kind="VARJAR" id="M2_REPO/lu/kbra/pclib-common/1.0.2-SNAPSHOT/pclib-common-1.0.2-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/json/json/20240303/json-20240303.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/mysql/mysql-connector-j/9.0.0/mysql-connector-j-9.0.0.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/lu/kbra/pclib-datastruct/1.0.2-SNAPSHOT/pclib-datastruct-1.0.2-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/lu/kbra/pclib-concurrency/1.0.2-SNAPSHOT/pclib-concurrency-1.0.2-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/lu/kbra/pclib-pointer/1.0.2-SNAPSHOT/pclib-pointer-1.0.2-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/lu/kbra/pclib-function/1.0.2-SNAPSHOT/pclib-function-1.0.2-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/fasterxml/jackson/core/jackson-databind/2.20.2/jackson-databind-2.20.2.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/fasterxml/jackson/core/jackson-annotations/2.20/jackson-annotations-2.20.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/fasterxml/jackson/core/jackson-core/2.20.2/jackson-core-2.20.2.jar" enabled="true" runInBatchMode="false"/>
