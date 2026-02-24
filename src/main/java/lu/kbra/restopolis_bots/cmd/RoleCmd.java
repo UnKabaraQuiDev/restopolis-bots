@@ -1,8 +1,11 @@
 package lu.kbra.restopolis_bots.cmd;
 
+import java.util.Collections;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import lu.kbra.restopolis_bots.data.TargetPlatform;
 import lu.kbra.restopolis_bots.db.data.TargetData;
 import lu.kbra.restopolis_bots.db.data.discord.DiscordPlatformData;
 import lu.kbra.restopolis_bots.db.table.TargetTable;
@@ -12,11 +15,11 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.components.actionrow.ActionRow;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
-@Component("schedule")
-public class ScheduleCmd implements SlashCommandExecutor {
+@Component("role")
+public class RoleCmd implements SlashCommandExecutor {
 
 	@Autowired
-	private DaySelectMenu daySelectMenu;
+	private RoleSelectMenu roleSelectMenu;
 	@Autowired
 	private TargetTable targetTable;
 	@Autowired
@@ -25,23 +28,28 @@ public class ScheduleCmd implements SlashCommandExecutor {
 	@Override
 	public void execute(SlashCommandInteractionEvent event) {
 		event.deferReply(true).queue();
-		if (event.isFromGuild() && !event.getMember()
-				.hasPermission(event.getGuildChannel(), Permission.ADMINISTRATOR, Permission.MANAGE_CHANNEL, Permission.MANAGE_SERVER)) {
+		if (!event.isFromGuild()) {
+			event.getHook().sendMessage("Server-only command.").setEphemeral(true).queue();
+			return;
+		}
+		if (!event.getMember().hasPermission(event.getGuildChannel(), Permission.MANAGE_CHANNEL, Permission.MANAGE_SERVER)) {
 			event.getHook().sendMessage("You don't have the permission to do that.").setEphemeral(true).queue();
 			return;
 		}
 		final DiscordPlatformData discordPlatformData = discordPlatformTable
 				.byServer(event.isFromGuild() ? event.getGuild().getIdLong() : event.getChannelIdLong())
-				.orElse(null);
-		if (discordPlatformData == null) {
-			event.getHook().sendMessage("Choose your days:").setEphemeral(true).addComponents(ActionRow.of(daySelectMenu.build())).queue();
-			return;
-		}
-		final TargetData targetData = targetTable.byId(discordPlatformData.getId());
+				.orElseGet(() -> {
+					final TargetData targetData = targetTable
+							.insertAndReload(new TargetData(TargetPlatform.DISCORD, Collections.emptyList()));
+					return discordPlatformTable.insertAndReload(new DiscordPlatformData(targetData.getId(),
+							event.isFromGuild() ? event.getGuild().getId() : event.getChannelId(),
+							event.getChannelId(),
+							null));
+				});
 		event.getHook()
-				.sendMessage("Choose your days:")
+				.sendMessage("Select your role:")
 				.setEphemeral(true)
-				.addComponents(ActionRow.of(daySelectMenu.build(targetData.getDays())))
+				.addComponents(ActionRow.of(roleSelectMenu.build(discordPlatformData.getRoleId())))
 				.queue();
 
 	}

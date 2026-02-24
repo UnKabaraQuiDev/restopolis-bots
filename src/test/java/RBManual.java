@@ -14,7 +14,7 @@ import lu.rescue_rush.spring.jda.DiscordSenderService;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = RBMain.class)
-public class RBTest {
+public class RBManual {
 
 	@Autowired
 	protected RestopolisFetcher restopolisFetcher;
@@ -25,13 +25,15 @@ public class RBTest {
 	private DiscordSchedule discordSchedule;
 
 	@BeforeAll
-	public void waitForJDA() {
+	public void waitForJDA() throws IOException {
 		if (discordSenderService != null) {
 			discordSenderService.awaitJDAReady();
 		}
+		restopolisFetcher.runListFetch();
 	}
 
 	@Test
+	@Disabled
 	public void testSite() throws IOException {
 		System.err.println("fetching sites");
 		restopolisFetcher.runListFetch();
@@ -45,15 +47,21 @@ public class RBTest {
 	}
 
 	@Test
+	@Disabled
 	public void fetchMenus() {
 		System.err.println("fetching menus");
 		restopolisFetcher.runMenuFetch();
 	}
 
 	@Test
-	@Disabled
-	public void testMessage() {
+	public void testMessage() throws InterruptedException {
+		System.err.println("running discord targets");
 		discordSchedule.runTargets();
+		
+		if (discordSenderService != null) {
+			System.err.println("waiting for messages");
+			discordSenderService.shutdown();
+		}
 	}
 
 }

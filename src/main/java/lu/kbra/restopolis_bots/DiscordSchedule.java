@@ -29,10 +29,8 @@ import lu.kbra.restopolis_bots.db.table.TargetTable;
 import lu.kbra.restopolis_bots.db.table.discord.DiscordPlatformTable;
 import lu.rescue_rush.spring.jda.DiscordSenderService;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.channel.ChannelType;
-import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 
 @Component
 public class DiscordSchedule {
@@ -69,22 +67,25 @@ public class DiscordSchedule {
 				return;
 			}
 
-			final DiscordPlatformData discordPlatformData = discordPlatformTable
-					.load(new DiscordPlatformData(target.getId()));
-
-			final Guild guild = jda.getGuildById(discordPlatformData.getServerId());
-			final TextChannel channel = (TextChannel) jda.getGuildChannelById(ChannelType.TEXT,
-					discordPlatformData.getChannelId());
-			final Role role = discordPlatformData.getRoleId() != null ? jda.getRoleById(discordPlatformData.getRoleId())
+			final DiscordPlatformData discordPlatformData = discordPlatformTable.load(new DiscordPlatformData(target.getId()));
+			System.err.println("discordPlatformData " + discordPlatformData);
+			final MessageChannel channel = discordPlatformData.isDm() ? jda.getPrivateChannelById(discordPlatformData.getChannelId())
+					: jda.getTextChannelById(discordPlatformData.getChannelId());
+			final Role role = !discordPlatformData.isDm() && discordPlatformData.getRoleId() != null
+					? jda.getRoleById(discordPlatformData.getRoleId())
 					: null;
-			if (guild == null || channel == null) {
+			System.err.println("channel " + channel);
+			if (channel == null) {
 				return;
 			}
 
-			final List<TargetRestaurantSectionData> targetRestaurantSectionDatas = targetRestaurantSectionTable
-					.byTarget(target.getId());
+			final List<TargetRestaurantSectionData> targetRestaurantSectionDatas = targetRestaurantSectionTable.byTarget(target.getId());
+			if (targetRestaurantSectionDatas.isEmpty()) {
+				return;
+			}
 			final List<RestaurantSectionData> restaurantSectionDatas = targetRestaurantSectionDatas.stream()
-					.map(c -> restaurantSectionTable.byId(c.getRestaurantSectionId())).toList();
+					.map(c -> restaurantSectionTable.byId(c.getRestaurantSectionId()))
+					.toList();
 
 			final Map<RestaurantData, Map<RestaurantSectionData, MealSectionData>> map = new HashMap<>();
 
@@ -98,9 +99,13 @@ public class DiscordSchedule {
 				map.get(restaurantData).put(restaurantSectionData, mealSectionData);
 			});
 
-			String msg = buildMessage(map.entrySet().stream()
-					.collect(Collectors.toMap(e -> e.getKey().getName(), e -> e.getValue().entrySet().stream().collect(
-							Collectors.toMap(e2 -> e2.getKey().getName(), e2 -> e2.getValue().getContent())))));
+			String msg = buildMessage(map.entrySet()
+					.stream()
+					.collect(Collectors.toMap(e -> e.getKey().getName(),
+							e -> e.getValue()
+									.entrySet()
+									.stream()
+									.collect(Collectors.toMap(e2 -> e2.getKey().getName(), e2 -> e2.getValue().getContent())))));
 
 			if (role != null) {
 				msg = role.getAsMention() + "\n" + msg;

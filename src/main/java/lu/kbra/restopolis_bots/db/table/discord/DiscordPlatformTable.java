@@ -29,7 +29,7 @@ public class DiscordPlatformTable extends DeferredDataBaseTable<DiscordPlatformD
 		return super.loadUniqueIfExists(new DiscordPlatformData(Long.toString(serverId)));
 	}
 
-	@CacheEvict(cacheNames = "discordPlatform.serverId", key = "#data.getServerId()")
+	@CacheEvict(cacheNames = "discordPlatform.serverId", key = "#data.serverId")
 	@Override
 	public DiscordPlatformData updateAndReload(DiscordPlatformData data) {
 		return super.updateAndReload(data);

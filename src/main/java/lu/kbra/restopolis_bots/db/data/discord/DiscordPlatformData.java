@@ -1,7 +1,9 @@
 package lu.kbra.restopolis_bots.db.data.discord;
 
 import lu.kbra.pclib.db.autobuild.column.Column;
+import lu.kbra.pclib.db.autobuild.column.DefaultValue;
 import lu.kbra.pclib.db.autobuild.column.ForeignKey;
+import lu.kbra.pclib.db.autobuild.column.Generated;
 import lu.kbra.pclib.db.autobuild.column.Nullable;
 import lu.kbra.pclib.db.autobuild.column.PrimaryKey;
 import lu.kbra.pclib.db.autobuild.column.Unique;
@@ -24,6 +26,11 @@ public class DiscordPlatformData implements TargetPlatformData {
 	@Column(length = 20)
 	@Nullable
 	protected String roleId;
+
+	@Column
+	@Generated
+	@DefaultValue("server_id = channel_id")
+	protected boolean dm;
 
 	public DiscordPlatformData() {
 	}
@@ -60,10 +67,22 @@ public class DiscordPlatformData implements TargetPlatformData {
 		return roleId;
 	}
 
+	public boolean isDm() {
+		return dm;
+	}
+
+	public void setRoleId(String roleId) {
+		this.roleId = roleId;
+	}
+
+	public void setChannelId(String channelId) {
+		this.channelId = channelId;
+	}
+
 	@Override
 	public String toString() {
 		return "DiscordPlatformData@" + System.identityHashCode(this) + " [id=" + id + ", serverId=" + serverId + ", channelId=" + channelId
-				+ ", roleId=" + roleId + "]";
+				+ ", roleId=" + roleId + ", dm=" + dm + "]";
 	}
 
 }

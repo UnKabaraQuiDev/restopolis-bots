@@ -23,12 +23,11 @@ import lu.kbra.restopolis_bots.data.TargetPlatform;
 import lu.kbra.restopolis_bots.db.table.discord.TargetPlatformTable;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
-import net.dv8tion.jda.api.utils.ChunkingFilter;
 
 @Configuration
 @EnableScheduling
 @EnableConfigurationProperties({ DbConfigData.class, DiscordConfigData.class })
-public class Config {
+public class RBConfig {
 
 	@Lazy
 	@Bean
@@ -38,8 +37,7 @@ public class Config {
 
 	@Bean
 	public DataBaseConnectorFactory dbConnectorFactory(final DbConfigData config) {
-		return () -> new MySQLDataBaseConnector(config.getUsername(), config.getPassword(), config.getHost(),
-				config.getPort());
+		return () -> new MySQLDataBaseConnector(config.getUsername(), config.getPassword(), config.getHost(), config.getPort());
 	}
 
 	@Bean
@@ -61,7 +59,7 @@ public class Config {
 
 	@Bean
 	public JDA jdaConfig(DiscordConfigData config) throws InterruptedException {
-		final JDA jda = JDABuilder.createDefault(config.getToken()).setChunkingFilter(ChunkingFilter.ALL).build();
+		final JDA jda = JDABuilder.createDefault(config.getToken()).build();
 		return jda;
 	}
 
