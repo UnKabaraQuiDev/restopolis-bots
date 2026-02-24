@@ -5,7 +5,7 @@
 
 	<groupId>lu.kbra</groupId>
 	<artifactId>restopolis-bots</artifactId>
-	<version>0.1</version>
+	<version>0.2</version>
 
 	<properties>
 		<java.version>17</java.version>
@@ -91,7 +91,7 @@
 			<groupId>lu.kbra</groupId>
 			<artifactId>pclib-db-spring</artifactId>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>lu.rescue-rush</groupId>
 			<artifactId>spring-jda</artifactId>
@@ -125,23 +125,6 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
-			<!--<version>3.5.10</version>-->
-			<!--<exclusions>
-				<exclusion>
-					<groupId>org.junit.jupiter</groupId>
-					<artifactId>junit-jupiter</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.junit.platform</groupId>
-					<artifactId>junit-platform-commons</artifactId>
-				</exclusion>
-			</exclusions>
-			<exclusions>
-				<exclusion>
-					<groupId>junit</groupId>
-					<artifactId>junit</artifactId>
-				</exclusion>
-			</exclusions>-->
 		</dependency>
 	</dependencies>
 
@@ -150,6 +133,72 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>install-jar</id>
+						<phase>install</phase>
+						<configuration>
+							<target>
+								<copy
+									file="${project.build.directory}/${project.build.finalName}.jar"
+									tofile="../deploy/restopolis-bots.jar" />
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>deploy-jar</id>
+						<phase>deploy</phase>
+						<configuration>
+							<target>
+								<exec executable="bash"
+									dir="${project.basedir}/../deploy">
+									<arg value="./copy.sh" />
+								</exec>
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>3.5.0</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+						<configuration>
+							<transformers>
+								<transformer
+									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+									<mainClass>lu.kbra.restopolis_bots.RBMain</mainClass>
+								</transformer>
+							</transformers>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 
 			<plugin>

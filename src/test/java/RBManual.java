@@ -7,9 +7,9 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import lu.kbra.restopolis_bots.DiscordSchedule;
 import lu.kbra.restopolis_bots.RBMain;
-import lu.kbra.restopolis_bots.RestopolisFetcher;
+import lu.kbra.restopolis_bots.scheduled.DiscordSchedule;
+import lu.kbra.restopolis_bots.scheduled.RestopolisFetcher;
 import lu.rescue_rush.spring.jda.DiscordSenderService;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -25,6 +25,7 @@ public class RBManual {
 	private DiscordSchedule discordSchedule;
 
 	@BeforeAll
+	@Disabled
 	public void waitForJDA() throws IOException {
 		if (discordSenderService != null) {
 			discordSenderService.awaitJDAReady();
@@ -54,6 +55,7 @@ public class RBManual {
 	}
 
 	@Test
+	@Disabled
 	public void testMessage() throws InterruptedException {
 		System.err.println("running discord targets");
 		discordSchedule.runTargets();

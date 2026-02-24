@@ -1,4 +1,4 @@
-package lu.kbra.restopolis_bots;
+package lu.kbra.restopolis_bots.scheduled;
 
 import java.io.IOException;
 import java.net.URI;
