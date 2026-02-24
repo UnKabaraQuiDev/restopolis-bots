@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.convert.ApplicationConversionService;
 import org.springframework.context.annotation.Bean;
@@ -19,6 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lu.kbra.pclib.db.connector.DataBaseConnectorFactory;
 import lu.kbra.pclib.db.connector.MySQLDataBaseConnector;
+import lu.kbra.restopolis_bots.RBMain;
 import lu.kbra.restopolis_bots.data.TargetPlatform;
 import lu.kbra.restopolis_bots.db.table.discord.TargetPlatformTable;
 import net.dv8tion.jda.api.JDA;
@@ -26,7 +28,7 @@ import net.dv8tion.jda.api.JDABuilder;
 
 @Configuration
 @EnableScheduling
-@EnableConfigurationProperties({ DbConfigData.class, DiscordConfigData.class })
+@EnableConfigurationProperties({ DbConfigData.class })
 public class RBConfig {
 
 	@Lazy
@@ -58,8 +60,11 @@ public class RBConfig {
 	}
 
 	@Bean
-	public JDA jdaConfig(DiscordConfigData config) throws InterruptedException {
-		final JDA jda = JDABuilder.createDefault(config.getToken()).build();
+	public JDA jdaConfig(@Value("${discord.token}") String token) throws InterruptedException {
+		if (token == null || token.isBlank()) {
+			throw new IllegalStateException("Expecting discord token (" + RBMain.CONFIG_FILE.toFile().getAbsolutePath() + ")");
+		}
+		final JDA jda = JDABuilder.createDefault(token).build();
 		return jda;
 	}
 

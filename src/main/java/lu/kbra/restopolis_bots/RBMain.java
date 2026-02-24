@@ -7,8 +7,15 @@ import java.nio.file.Paths;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
+@ComponentScan(
+		basePackages = {
+				"lu.kbra.restopolis_bots", // your main app
+				"lu.rescue_rush.spring.jda" // the dependency
+		}
+)
 public class RBMain {
 
 	public static final Path CONFIG_DIR = Paths.get("./config/");
@@ -29,11 +36,12 @@ public class RBMain {
 					db.name=restopolis_bots
 					discord.token=
 										""");
-			System.out.println("Created empty config to: " + CONFIG_FILE);
+			System.out.println("Created empty config to: " + CONFIG_FILE.toFile().getAbsolutePath());
 			return;
 		}
 
-		SpringApplication.run(RBMain.class, args);
+		final SpringApplication app = new SpringApplication(RBMain.class);
+		app.run(args);
 	}
 
 }
