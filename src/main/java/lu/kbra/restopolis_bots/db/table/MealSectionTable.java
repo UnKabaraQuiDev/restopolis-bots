@@ -16,7 +16,6 @@ public class MealSectionTable extends DeferredDataBaseTable<MealSectionData> {
 
 	@Cacheable(cacheNames = "mealSection.mealId-restaurantSectionId")
 	public MealSectionData byMealAndRestaurantSection(long mealId, long restaurantSectionId) {
-		System.err.println(mealId + ", " + restaurantSectionId);
 		return super.load(new MealSectionData(mealId, restaurantSectionId));
 	}
 

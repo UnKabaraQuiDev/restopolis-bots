@@ -1,6 +1,8 @@
 package lu.kbra.restopolis_bots.cmd;
 
-import java.util.Collections;
+import java.time.DayOfWeek;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -62,7 +64,8 @@ public class SelectCmd implements SlashCommandExecutor, SlashCommandAutocomplete
 		@Override
 		public void execute(SlashCommandInteractionEvent event) {
 			event.deferReply(true).queue();
-			discordPlatformTable.byServer(event.isFromGuild() ? event.getGuild().getIdLong() : event.getChannelIdLong())
+			discordPlatformTable
+					.byServer(event.isFromGuild() ? event.getGuild().getIdLong() : event.getChannelIdLong())
 					.ifPresentOrElse(discordPlatformData -> {
 						final List<RestaurantSectionData> restaurantSections = targetRestaurantSectionTable
 								.byTarget(discordPlatformData.getId())
@@ -70,10 +73,12 @@ public class SelectCmd implements SlashCommandExecutor, SlashCommandAutocomplete
 								.map(c -> restaurantSectionTable.byId(c.getRestaurantSectionId()))
 								.sorted((a, b) -> Long.compare(a.getRestaurantId(), b.getRestaurantId()))
 								.toList();
-						final String msg = restaurantSections.stream()
+						final String msg = restaurantSections
+								.stream()
 								.map(c -> "* __" + restaurantTable.byId(c.getRestaurantId()).getName() + "__: " + c.getName())
 								.collect(Collectors.joining("\n"));
-						event.getHook()
+						event
+								.getHook()
 								.sendMessage("**Your restaurants:**\n" + (msg == null || msg.isBlank() ? "*No content*" : msg))
 								.setEphemeral(true)
 								.queue();
@@ -119,15 +124,22 @@ public class SelectCmd implements SlashCommandExecutor, SlashCommandAutocomplete
 						.byServer(event.isFromGuild() ? event.getGuild().getIdLong() : event.getChannelIdLong())
 						.orElseGet(() -> {
 							final TargetData targetData = targetTable
-									.insertAndReload(new TargetData(TargetPlatform.DISCORD, Collections.emptyList()));
-							return discordPlatformTable.insertAndReload(new DiscordPlatformData(targetData.getId(),
-									event.isFromGuild() ? event.getGuild().getId() : event.getChannelId(),
-									event.isFromGuild() ? event.getChannelId() : event.getUser().getId(),
-									null,
-									!event.isFromGuild()));
+									.insertAndReload(new TargetData(TargetPlatform.DISCORD,
+											new ArrayList<>(Arrays
+													.asList(DayOfWeek.MONDAY,
+															DayOfWeek.TUESDAY,
+															DayOfWeek.WEDNESDAY,
+															DayOfWeek.THURSDAY,
+															DayOfWeek.FRIDAY))));
+							return discordPlatformTable
+									.insertAndReload(new DiscordPlatformData(targetData.getId(),
+											event.isFromGuild() ? event.getGuild().getId() : event.getChannelId(),
+											event.isFromGuild() ? event.getChannelId() : event.getUser().getId(), null,
+											!event.isFromGuild()));
 						});
 
-				targetRestaurantSectionTable.byTarget(discordPlatformData.getId())
+				targetRestaurantSectionTable
+						.byTarget(discordPlatformData.getId())
 						.stream()
 						.map(TargetRestaurantSectionData::getRestaurantSectionId)
 						.map(restaurantSectionTable::byId)
@@ -135,15 +147,18 @@ public class SelectCmd implements SlashCommandExecutor, SlashCommandAutocomplete
 						.forEach(c -> targetRestaurantSectionTable
 								.deleteIfExists(new TargetRestaurantSectionData(discordPlatformData.getId(), c.getId())));
 
-				final List<RestaurantSectionData> restaurantSections = targetRestaurantSectionTable.byTarget(discordPlatformData.getId())
+				final List<RestaurantSectionData> restaurantSections = targetRestaurantSectionTable
+						.byTarget(discordPlatformData.getId())
 						.stream()
 						.map(c -> restaurantSectionTable.byId(c.getRestaurantSectionId()))
 						.sorted((a, b) -> Long.compare(a.getRestaurantId(), b.getRestaurantId()))
 						.toList();
-				final String msg = restaurantSections.stream()
+				final String msg = restaurantSections
+						.stream()
 						.map(c -> "* __" + restaurantTable.byId(c.getRestaurantId()).getName() + "__: " + c.getName())
 						.collect(Collectors.joining("\n"));
-				event.getHook()
+				event
+						.getHook()
 						.sendMessage("**Your restaurants:**\n" + (msg == null || msg.isBlank() ? "*No content*" : msg))
 						.setEphemeral(true)
 						.queue();
@@ -154,12 +169,19 @@ public class SelectCmd implements SlashCommandExecutor, SlashCommandAutocomplete
 
 		@Override
 		public void complete(CommandAutoCompleteInteractionEvent event) {
-			discordPlatformTable.byServer(event.isFromGuild() ? event.getGuild().getIdLong() : event.getChannelIdLong())
-					.ifPresentOrElse(discordPlatformData -> event.replyChoiceStrings(targetRestaurantView
-							.likeName(event.getFocusedOption().getValue(), OptionData.MAX_CHOICES, discordPlatformData.getId())
-							.stream()
-							.map(TargetRestaurantROData::getName)
-							.toList()).queue(), () -> event.replyChoiceStrings("No results.").queue());
+			discordPlatformTable
+					.byServer(event.isFromGuild() ? event.getGuild().getIdLong() : event.getChannelIdLong())
+					.ifPresentOrElse(
+							discordPlatformData -> event
+									.replyChoiceStrings(targetRestaurantView
+											.likeName(event.getFocusedOption().getValue(),
+													OptionData.MAX_CHOICES,
+													discordPlatformData.getId())
+											.stream()
+											.map(TargetRestaurantROData::getName)
+											.toList())
+									.queue(),
+							() -> event.replyChoiceStrings("No results.").queue());
 		}
 
 		@Override
@@ -206,27 +228,36 @@ public class SelectCmd implements SlashCommandExecutor, SlashCommandAutocomplete
 						.byServer(event.isFromGuild() ? event.getGuild().getIdLong() : event.getChannelIdLong())
 						.orElseGet(() -> {
 							final TargetData targetData = targetTable
-									.insertAndReload(new TargetData(TargetPlatform.DISCORD, Collections.emptyList()));
-							return discordPlatformTable.insertAndReload(new DiscordPlatformData(targetData.getId(),
-									event.isFromGuild() ? event.getGuild().getId() : event.getChannelId(),
-									event.isFromGuild() ? event.getChannelId() : event.getUser().getId(),
-									null,
-									!event.isFromGuild()));
+									.insertAndReload(new TargetData(TargetPlatform.DISCORD,
+											new ArrayList<>(Arrays
+													.asList(DayOfWeek.MONDAY,
+															DayOfWeek.TUESDAY,
+															DayOfWeek.WEDNESDAY,
+															DayOfWeek.THURSDAY,
+															DayOfWeek.FRIDAY))));
+							return discordPlatformTable
+									.insertAndReload(new DiscordPlatformData(targetData.getId(),
+											event.isFromGuild() ? event.getGuild().getId() : event.getChannelId(),
+											event.isFromGuild() ? event.getChannelId() : event.getUser().getId(), null,
+											!event.isFromGuild()));
 						});
 
-				final List<Long> restaurantSectionDatas = targetRestaurantSectionTable.byTarget(discordPlatformData.getId())
+				final List<Long> restaurantSectionDatas = targetRestaurantSectionTable
+						.byTarget(discordPlatformData.getId())
 						.stream()
 						.map(TargetRestaurantSectionData::getRestaurantSectionId)
 						.toList();
 
 				if (restaurantSectionTable.countUniques(new RestaurantSectionData(restaurant.getId(), null)) > 0) {
-					event.getHook()
+					event
+							.getHook()
 							.sendMessage("Restaurant __" + restaurantName + "__:")
 							.setEphemeral(true)
 							.addComponents(ActionRow.of(restaurantSectionSelectMenu.build(restaurant, restaurantSectionDatas)))
 							.queue();
 				} else {
-					event.getHook()
+					event
+							.getHook()
 							.sendMessage("Restaurant __" + restaurantName + "__: *Doesn't serve anything ?*")
 							.setEphemeral(true)
 							.queue();
@@ -238,10 +269,13 @@ public class SelectCmd implements SlashCommandExecutor, SlashCommandAutocomplete
 
 		@Override
 		public void complete(CommandAutoCompleteInteractionEvent event) {
-			event.replyChoiceStrings(restaurantTable.likeName(event.getFocusedOption().getValue(), OptionData.MAX_CHOICES)
-					.stream()
-					.map(RestaurantData::getName)
-					.toList()).queue();
+			event
+					.replyChoiceStrings(restaurantTable
+							.likeName(event.getFocusedOption().getValue(), OptionData.MAX_CHOICES)
+							.stream()
+							.map(RestaurantData::getName)
+							.toList())
+					.queue();
 		}
 
 		@Override

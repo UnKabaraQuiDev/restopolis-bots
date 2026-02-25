@@ -2,6 +2,8 @@ package lu.kbra.restopolis_bots.cmd;
 
 import java.time.DayOfWeek;
 import java.time.format.TextStyle;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -37,12 +39,17 @@ public class DaySelectMenu implements DiscordStringMenu, DiscordStringMenuExecut
 				.byServer(event.isFromGuild() ? event.getGuild().getIdLong() : event.getChannelIdLong())
 				.orElseGet(() -> {
 					final TargetData targetData = targetTable
-							.insertAndReload(new TargetData(TargetPlatform.DISCORD, Collections.emptyList()));
-					return discordPlatformTable.insertAndReload(new DiscordPlatformData(targetData.getId(),
-							event.isFromGuild() ? event.getGuild().getId() : event.getChannelId(),
-							event.isFromGuild() ? event.getChannelId() : event.getUser().getId(),
-							null,
-							!event.isFromGuild()));
+							.insertAndReload(new TargetData(TargetPlatform.DISCORD,
+									new ArrayList<>(Arrays
+											.asList(DayOfWeek.MONDAY,
+													DayOfWeek.TUESDAY,
+													DayOfWeek.WEDNESDAY,
+													DayOfWeek.THURSDAY,
+													DayOfWeek.FRIDAY))));
+					return discordPlatformTable
+							.insertAndReload(new DiscordPlatformData(targetData.getId(),
+									event.isFromGuild() ? event.getGuild().getId() : event.getChannelId(),
+									event.isFromGuild() ? event.getChannelId() : event.getUser().getId(), null, !event.isFromGuild()));
 				});
 
 		final TargetData targetData = targetTable.byId(discordPlatformData);
@@ -57,7 +64,8 @@ public class DaySelectMenu implements DiscordStringMenu, DiscordStringMenuExecut
 	}
 
 	public StringSelectMenu build(List<DayOfWeek> dows) {
-		final StringSelectMenu.Builder a = StringSelectMenu.create(beanName)
+		final StringSelectMenu.Builder a = StringSelectMenu
+				.create(beanName)
 				.setPlaceholder("Select the days")
 				.setMinValues(0)
 				.setMaxValues(7);

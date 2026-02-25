@@ -1,5 +1,8 @@
 package lu.kbra.restopolis_bots.cmd;
 
+import java.time.DayOfWeek;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -46,12 +49,17 @@ public class RestaurantSectionSelectMenu implements DiscordStringMenu, DiscordSt
 				.byServer(event.isFromGuild() ? event.getGuild().getIdLong() : event.getChannelIdLong())
 				.orElseGet(() -> {
 					final TargetData targetData = targetTable
-							.insertAndReload(new TargetData(TargetPlatform.DISCORD, Collections.emptyList()));
-					return discordPlatformTable.insertAndReload(new DiscordPlatformData(targetData.getId(),
-							event.isFromGuild() ? event.getGuild().getId() : event.getChannelId(),
-							event.isFromGuild() ? event.getChannelId() : event.getUser().getId(),
-							null,
-							!event.isFromGuild()));
+							.insertAndReload(new TargetData(TargetPlatform.DISCORD,
+									new ArrayList<>(Arrays
+											.asList(DayOfWeek.MONDAY,
+													DayOfWeek.TUESDAY,
+													DayOfWeek.WEDNESDAY,
+													DayOfWeek.THURSDAY,
+													DayOfWeek.FRIDAY))));
+					return discordPlatformTable
+							.insertAndReload(new DiscordPlatformData(targetData.getId(),
+									event.isFromGuild() ? event.getGuild().getId() : event.getChannelId(),
+									event.isFromGuild() ? event.getChannelId() : event.getUser().getId(), null, !event.isFromGuild()));
 				});
 
 		event.getSelectedOptions().forEach(c -> {
@@ -64,15 +72,18 @@ public class RestaurantSectionSelectMenu implements DiscordStringMenu, DiscordSt
 					.deleteIfExists(new TargetRestaurantSectionData(discordPlatformData.getId(), Long.parseLong(c.getValue())));
 		});
 
-		final List<RestaurantSectionData> restaurantSections = targetRestaurantSectionTable.byTarget(discordPlatformData.getId())
+		final List<RestaurantSectionData> restaurantSections = targetRestaurantSectionTable
+				.byTarget(discordPlatformData.getId())
 				.stream()
 				.map(c -> restaurantSectionTable.byId(c.getRestaurantSectionId()))
 				.sorted((a, b) -> Long.compare(a.getRestaurantId(), b.getRestaurantId()))
 				.toList();
-		final String msg = restaurantSections.stream()
+		final String msg = restaurantSections
+				.stream()
 				.map(c -> "* __" + restaurantTable.byId(c.getRestaurantId()).getName() + "__: " + c.getName())
 				.collect(Collectors.joining("\n"));
-		event.getHook()
+		event
+				.getHook()
 				.sendMessage("**Your restaurants:**\n" + (msg == null || msg.isBlank() ? "*No content*" : msg))
 				.setEphemeral(true)
 				.queue();
@@ -86,10 +97,11 @@ public class RestaurantSectionSelectMenu implements DiscordStringMenu, DiscordSt
 
 	public StringSelectMenu build(final RestaurantData restaurant, List<Long> selected) {
 		final List<RestaurantSectionData> all = restaurantSectionTable.byRestaurant(restaurant.getId());
-		if(all.isEmpty()) {
+		if (all.isEmpty()) {
 			return null;
 		}
-		final StringSelectMenu.Builder a = StringSelectMenu.create(beanName)
+		final StringSelectMenu.Builder a = StringSelectMenu
+				.create(beanName)
 				.setPlaceholder("Select the sections")
 				.setMinValues(0)
 				.setMaxValues(all.size());
