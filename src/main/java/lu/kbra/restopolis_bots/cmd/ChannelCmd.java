@@ -12,6 +12,7 @@ import lu.kbra.restopolis_bots.db.data.TargetData;
 import lu.kbra.restopolis_bots.db.data.discord.DiscordPlatformData;
 import lu.kbra.restopolis_bots.db.table.TargetTable;
 import lu.kbra.restopolis_bots.db.table.discord.DiscordPlatformTable;
+import lu.kbra.restopolis_bots.menu.ChannelSelectMenu;
 import lu.rescue_rush.spring.jda.command.slash.SlashCommandExecutor;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.components.actionrow.ActionRow;

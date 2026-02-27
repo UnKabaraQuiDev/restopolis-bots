@@ -3,7 +3,6 @@ package lu.kbra.restopolis_bots.cmd;
 import java.time.DayOfWeek;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -13,6 +12,7 @@ import lu.kbra.restopolis_bots.db.data.TargetData;
 import lu.kbra.restopolis_bots.db.data.discord.DiscordPlatformData;
 import lu.kbra.restopolis_bots.db.table.TargetTable;
 import lu.kbra.restopolis_bots.db.table.discord.DiscordPlatformTable;
+import lu.kbra.restopolis_bots.menu.RoleSelectMenu;
 import lu.rescue_rush.spring.jda.command.slash.SlashCommandExecutor;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.components.actionrow.ActionRow;

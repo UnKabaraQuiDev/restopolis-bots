@@ -7,26 +7,23 @@ import lu.kbra.restopolis_bots.db.data.TargetData;
 import lu.kbra.restopolis_bots.db.data.discord.DiscordPlatformData;
 import lu.kbra.restopolis_bots.db.table.TargetTable;
 import lu.kbra.restopolis_bots.db.table.discord.DiscordPlatformTable;
-import lu.kbra.restopolis_bots.menu.DaySelectMenu;
 import lu.rescue_rush.spring.jda.command.slash.SlashCommandExecutor;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.components.actionrow.ActionRow;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
-@Component("schedule")
-public class ScheduleCmd implements SlashCommandExecutor {
+@Component("unsubscribe")
+public class UnsubscribeCmd implements SlashCommandExecutor {
 
 	@Autowired
-	private DaySelectMenu daySelectMenu;
+	private DiscordPlatformTable discordPlatformTable;
 	@Autowired
 	private TargetTable targetTable;
-	@Autowired
-	private DiscordPlatformTable discordPlatformTable;
 
 	@Override
 	public void execute(SlashCommandInteractionEvent event) {
 		event.deferReply(true).queue();
-		if (event.isFromGuild() && !event.getMember()
+		if (event.isFromGuild() && !event
+				.getMember()
 				.hasPermission(event.getGuildChannel(), Permission.ADMINISTRATOR, Permission.MANAGE_CHANNEL, Permission.MANAGE_SERVER)) {
 			event.getHook().sendMessage("You don't have the permission to do that.").setEphemeral(true).queue();
 			return;
@@ -35,21 +32,18 @@ public class ScheduleCmd implements SlashCommandExecutor {
 				.byServer(event.isFromGuild() ? event.getGuild().getIdLong() : event.getChannelIdLong())
 				.orElse(null);
 		if (discordPlatformData == null) {
-			event.getHook().sendMessage("Choose your days:").setEphemeral(true).addComponents(ActionRow.of(daySelectMenu.build())).queue();
+			event.getHook().sendMessage("You weren't subscribed in the first place :'(").setEphemeral(true).queue();
 			return;
 		}
 		final TargetData targetData = targetTable.byId(discordPlatformData.getId());
-		event.getHook()
-				.sendMessage("Choose your days:")
-				.setEphemeral(true)
-				.addComponents(ActionRow.of(daySelectMenu.build(targetData.getDays())))
-				.queue();
-
+		discordPlatformTable.deleteIfExists(discordPlatformData);
+		targetTable.deleteIfExists(targetData);
+		event.getHook().sendMessage("Unsubscribed :sob:.").setEphemeral(true).queue();
 	}
 
 	@Override
 	public String description() {
-		return "Select the days you wish to receive the notification.";
+		return "Unsubscribe your server from our list.";
 	}
 
 }

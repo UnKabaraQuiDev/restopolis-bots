@@ -1,9 +1,8 @@
-package lu.kbra.restopolis_bots.cmd;
+package lu.kbra.restopolis_bots.menu;
 
 import java.time.DayOfWeek;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -20,8 +19,8 @@ import net.dv8tion.jda.api.components.selections.EntitySelectMenu.DefaultValue;
 import net.dv8tion.jda.api.components.selections.EntitySelectMenu.SelectTarget;
 import net.dv8tion.jda.api.events.interaction.component.EntitySelectInteractionEvent;
 
-@Component("role_select")
-public class RoleSelectMenu implements DiscordEntityMenu, DiscordEntityMenuExecutor {
+@Component("channel_select")
+public class ChannelSelectMenu implements DiscordEntityMenu, DiscordEntityMenuExecutor {
 
 	private String beanName;
 
@@ -51,12 +50,13 @@ public class RoleSelectMenu implements DiscordEntityMenu, DiscordEntityMenuExecu
 									event.isFromGuild() ? event.getChannelId() : event.getUser().getId(), null, !event.isFromGuild()));
 				});
 
-		discordPlatformData.setRoleId(event.getMentions().getRoles().isEmpty() ? null : event.getMentions().getRoles().get(0).getId());
+		discordPlatformData
+				.setChannelId(event.getMentions().getChannels().isEmpty() ? null : event.getMentions().getChannels().get(0).getId());
 		discordPlatformTable.updateAndReload(discordPlatformData);
 		event
 				.getHook()
-				.sendMessage("Updated role to: "
-						+ (discordPlatformData.getRoleId() == null ? "*None*" : ("<@" + discordPlatformData.getRoleId() + ">")))
+				.sendMessage("Updated channel to: "
+						+ (discordPlatformData.getRoleId() == null ? "*None*" : ("<#" + discordPlatformData.getRoleId() + ">")))
 				.setEphemeral(true)
 				.queue();
 	}
@@ -66,14 +66,14 @@ public class RoleSelectMenu implements DiscordEntityMenu, DiscordEntityMenuExecu
 		return build(null);
 	}
 
-	public EntitySelectMenu build(String roleId) {
+	public EntitySelectMenu build(String channelId) {
 		final EntitySelectMenu.Builder a = EntitySelectMenu
-				.create(beanName, SelectTarget.ROLE)
-				.setPlaceholder("Select the role")
+				.create(beanName, SelectTarget.CHANNEL)
+				.setPlaceholder("Select the channel")
 				.setMinValues(0)
 				.setMaxValues(1);
-		if (roleId != null) {
-			a.setDefaultValues(DefaultValue.role(roleId));
+		if (channelId != null) {
+			a.setDefaultValues(DefaultValue.channel(channelId));
 		}
 		return a.build();
 	}

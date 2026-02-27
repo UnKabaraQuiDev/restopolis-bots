@@ -1,9 +1,8 @@
-package lu.kbra.restopolis_bots.cmd;
+package lu.kbra.restopolis_bots.menu;
 
 import java.time.DayOfWeek;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 

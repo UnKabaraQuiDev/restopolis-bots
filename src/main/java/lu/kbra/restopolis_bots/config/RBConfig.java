@@ -26,6 +26,7 @@ import lu.kbra.restopolis_bots.data.TargetPlatform;
 import lu.kbra.restopolis_bots.db.table.discord.TargetPlatformTable;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.entities.Activity;
 
 @Configuration
 @EnableScheduling
@@ -66,7 +67,10 @@ public class RBConfig {
 		if (token == null || token.isBlank()) {
 			throw new IllegalStateException("Expecting discord token (" + RBMain.CONFIG_FILE.toFile().getAbsolutePath() + ")");
 		}
-		final JDA jda = JDABuilder.createDefault(token).build();
+		final JDA jda = JDABuilder
+				.createDefault(token)
+				.setActivity(Activity.playing("Rating restopolis food!").withState("3/5 🌟"))
+				.build();
 		return jda;
 	}
 

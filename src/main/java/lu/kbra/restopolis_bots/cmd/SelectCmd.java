@@ -22,9 +22,11 @@ import lu.kbra.restopolis_bots.db.table.TargetRestaurantSectionTable;
 import lu.kbra.restopolis_bots.db.table.TargetTable;
 import lu.kbra.restopolis_bots.db.table.discord.DiscordPlatformTable;
 import lu.kbra.restopolis_bots.db.view.TargetRestaurantView;
+import lu.kbra.restopolis_bots.menu.RestaurantSectionSelectMenu;
 import lu.rescue_rush.spring.jda.command.slash.SlashCommandAutocomplete;
 import lu.rescue_rush.spring.jda.command.slash.SlashCommandExecutor;
 import lu.rescue_rush.spring.jda.command.slash.SubSlashCommandExecutor;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.components.actionrow.ActionRow;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -32,15 +34,10 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 
 @Component("select")
-public class SelectCmd implements SlashCommandExecutor, SlashCommandAutocomplete {
+public class SelectCmd implements SlashCommandExecutor {
 
 	@Override
 	public void execute(SlashCommandInteractionEvent event) {
-
-	}
-
-	@Override
-	public void complete(CommandAutoCompleteInteractionEvent event) {
 
 	}
 
@@ -64,6 +61,10 @@ public class SelectCmd implements SlashCommandExecutor, SlashCommandAutocomplete
 		@Override
 		public void execute(SlashCommandInteractionEvent event) {
 			event.deferReply(true).queue();
+			if (!event.getMember().hasPermission(event.getGuildChannel(), Permission.MANAGE_CHANNEL, Permission.MANAGE_SERVER)) {
+				event.getHook().sendMessage("You don't have the permission to do that.").setEphemeral(true).queue();
+				return;
+			}
 			discordPlatformTable
 					.byServer(event.isFromGuild() ? event.getGuild().getIdLong() : event.getChannelIdLong())
 					.ifPresentOrElse(discordPlatformData -> {
