@@ -83,8 +83,7 @@ public class RestopolisFetcher {
 			final String dataSite = c.attr("data-site");
 			final String name = c.text();
 			final String absHref = c.attr("href");
-			if (dataSite == null || dataSite.isBlank() || name == null || name.isBlank() || absHref == null
-					|| absHref.isBlank()) {
+			if (dataSite == null || dataSite.isBlank() || name == null || name.isBlank() || absHref == null || absHref.isBlank()) {
 				return;
 			}
 			final URI href;
@@ -98,8 +97,7 @@ public class RestopolisFetcher {
 			final String restaurantId = Arrays.stream(hrefQuery.split("&")).map(q -> {
 				final String[] split = q.split("=");
 				return Pairs.readOnly(split[0], split[1]);
-			}).filter(p -> "pRestaurantSelection".equalsIgnoreCase(p.getKey())).findFirst().map(Pair::getValue)
-					.orElse(null);
+			}).filter(p -> "pRestaurantSelection".equalsIgnoreCase(p.getKey())).findFirst().map(Pair::getValue).orElse(null);
 			// /eRestauration/CustomerServices/Menu/BtnChangeRestaurant?pRestaurantSelection=1198
 			if (restaurantId == null || restaurantId.isBlank()) {
 				return;
@@ -112,43 +110,41 @@ public class RestopolisFetcher {
 	}
 
 	public Pair<LocalDate, Map<String, List<String>>> fetchForRestaurant(long restaurantId) {
-		// https://ssl.education.lu/eRestauration/CustomerServices/Menu/BtnChangeRestaurant?pRestaurantSelection=1198
-		final Document doc;
 		try {
-			doc = Jsoup
-					.parse(fetchHtmlWithCookies(targetUrl, cookies.replace("%TARGET%", Long.toString(restaurantId))));
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
-		}
+			// https://ssl.education.lu/eRestauration/CustomerServices/Menu/BtnChangeRestaurant?pRestaurantSelection=1198
+			final Document doc = Jsoup.parse(fetchHtmlWithCookies(targetUrl, cookies.replace("%TARGET%", Long.toString(restaurantId))));
 
-		final String dateStr = doc.select("a.day.active").attr("data-date");
-		final LocalDate date = LocalDate.parse(dateStr, DATE_FMT);
-		final Elements divContainers = doc.select("div.formulaeContainer");
-		if (divContainers.isEmpty()) {
-			return null;
-		}
-		final Element divContainer = divContainers.get(date.getDayOfWeek().getValue() - 1);
-		final Elements courseDivs = divContainer.select("div.course-name");
-
-		final Map<String, List<String>> map = new HashMap<>();
-
-		for (final Element courseDiv : courseDivs) {
-			final String courseName = courseDiv.text();
-			Element sibling = courseDiv.nextElementSibling();
-
-			while (sibling != null && !sibling.hasClass("course-name")) {
-
-				if (sibling.hasClass("product-name")) {
-					map.computeIfAbsent(courseName, k -> new ArrayList<>());
-					map.get(courseName).add(sibling.text());
-				}
-
-				sibling = sibling.nextElementSibling();
+			final String dateStr = doc.select("a.day.active").attr("data-date");
+			final LocalDate date = LocalDate.parse(dateStr, DATE_FMT);
+			final Elements divContainers = doc.select("div.formulaeContainer");
+			if (divContainers.isEmpty()) {
+				return null;
 			}
-		}
+			final Element divContainer = divContainers.get(date.getDayOfWeek().getValue() - 1);
+			final Elements courseDivs = divContainer.select("div.course-name");
 
-		return Pairs.readOnly(date, map);
+			final Map<String, List<String>> map = new HashMap<>();
+
+			for (final Element courseDiv : courseDivs) {
+				final String courseName = courseDiv.text();
+				Element sibling = courseDiv.nextElementSibling();
+
+				while (sibling != null && !sibling.hasClass("course-name")) {
+
+					if (sibling.hasClass("product-name")) {
+						map.computeIfAbsent(courseName, k -> new ArrayList<>());
+						map.get(courseName).add(sibling.text());
+					}
+
+					sibling = sibling.nextElementSibling();
+				}
+			}
+
+			return Pairs.readOnly(date, map);
+		} catch (Exception e) {
+			System.err.println("Error on fetch restaurant " + restaurantId + ": " + e.getMessage() + " (" + e.getClass().getName() + ")");
+			return null;
+		}
 	}
 
 	@Scheduled(cron = "0 30 8 * * *")
@@ -162,8 +158,7 @@ public class RestopolisFetcher {
 				LOGGER.info("Menu fetch OK: " + restaurant.getId() + " (" + restaurant.getName() + ")");
 			}
 
-			final MealData mealData = mealTable
-					.loadUniqueIfExistsElseInsert(new MealData(restaurant.getId(), pair.getKey()));
+			final MealData mealData = mealTable.loadUniqueIfExistsElseInsert(new MealData(restaurant.getId(), pair.getKey()));
 
 			pair.getValue().forEach((k, v) -> {
 				final RestaurantSectionData restaurantSection = restaurantSectionTable
