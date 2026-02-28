@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import lu.kbra.restopolis_bots.RBMain;
+import lu.kbra.restopolis_bots.db.data.RestaurantData;
+import lu.kbra.restopolis_bots.db.table.RestaurantTable;
 import lu.kbra.restopolis_bots.scheduled.DiscordSchedule;
 import lu.kbra.restopolis_bots.scheduled.RestopolisFetcher;
 import lu.rescue_rush.spring.jda.DiscordSenderService;
@@ -17,7 +19,9 @@ import lu.rescue_rush.spring.jda.DiscordSenderService;
 public class RBManual {
 
 	@Autowired
-	protected RestopolisFetcher restopolisFetcher;
+	private RestopolisFetcher restopolisFetcher;
+	@Autowired
+	private RestaurantTable restaurantTable;
 
 	@Autowired(required = false)
 	private DiscordSenderService discordSenderService;
@@ -44,7 +48,8 @@ public class RBManual {
 	@Disabled
 	public void fetchMenu() {
 		System.err.println("fetching menu");
-		restopolisFetcher.fetchForRestaurant(1198);
+		final RestaurantData rd = restaurantTable.byId(1198);
+		restopolisFetcher.fetchForRestaurant(rd);
 	}
 
 	@Test
@@ -59,7 +64,7 @@ public class RBManual {
 	public void testMessage() throws InterruptedException {
 		System.err.println("running discord targets");
 		discordSchedule.runTargets();
-		
+
 		if (discordSenderService != null) {
 			System.err.println("waiting for messages");
 			discordSenderService.shutdown();
