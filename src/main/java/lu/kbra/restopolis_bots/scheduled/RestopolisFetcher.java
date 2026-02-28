@@ -109,10 +109,11 @@ public class RestopolisFetcher {
 		});
 	}
 
-	public Pair<LocalDate, Map<String, List<String>>> fetchForRestaurant(long restaurantId) {
+	public Pair<LocalDate, Map<String, List<String>>> fetchForRestaurant(RestaurantData restaurant) {
 		try {
 			// https://ssl.education.lu/eRestauration/CustomerServices/Menu/BtnChangeRestaurant?pRestaurantSelection=1198
-			final Document doc = Jsoup.parse(fetchHtmlWithCookies(targetUrl, cookies.replace("%TARGET%", Long.toString(restaurantId))));
+			final Document doc = Jsoup
+					.parse(fetchHtmlWithCookies(targetUrl, cookies.replace("%TARGET%", Long.toString(restaurant.getId()))));
 
 			final String dateStr = doc.select("a.day.active").attr("data-date");
 			final LocalDate date = LocalDate.parse(dateStr, DATE_FMT);
@@ -142,7 +143,8 @@ public class RestopolisFetcher {
 
 			return Pairs.readOnly(date, map);
 		} catch (Exception e) {
-			System.err.println("Error on fetch restaurant " + restaurantId + ": " + e.getMessage() + " (" + e.getClass().getName() + ")");
+			LOGGER.warning("Error on fetch restaurant " + restaurant.getId() + " (" + restaurant.getName() + "): " + e.getMessage()
+					+ " (" + e.getClass().getName() + ")");
 			return null;
 		}
 	}
@@ -150,9 +152,9 @@ public class RestopolisFetcher {
 	@Scheduled(cron = "0 30 8 * * *")
 	public void runMenuFetch() {
 		restaurantTable.all().forEachRemaining(restaurant -> {
-			final Pair<LocalDate, Map<String, List<String>>> pair = fetchForRestaurant(restaurant.getId());
+			final Pair<LocalDate, Map<String, List<String>>> pair = fetchForRestaurant(restaurant);
 			if (pair == null) {
-				LOGGER.warning("Menu fetch failed for: " + restaurant.getId() + " (" + restaurant.getName() + ")");
+//				LOGGER.warning("Menu fetch failed for: " + restaurant.getId() + " (" + restaurant.getName() + ")");
 				return;
 			} else {
 				LOGGER.info("Menu fetch OK: " + restaurant.getId() + " (" + restaurant.getName() + ")");
