@@ -18,14 +18,27 @@ import org.springframework.context.annotation.ComponentScan;
 )
 public class RBMain {
 
-	public static final Path CONFIG_DIR = Paths.get("./config/");
-	public static final Path CONFIG_FILE = CONFIG_DIR.resolve("application.properties");
+	public static Path JAR_DIR;
+	public static Path CONFIG_DIR;
+	public static Path CONFIG_FILE;
+
+	static {
+		try {
+			JAR_DIR = Paths.get(".").toRealPath();
+			CONFIG_DIR = JAR_DIR.resolve("config/");
+			CONFIG_FILE = CONFIG_DIR.resolve("application.properties");
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
+	}
 
 	public static void main(String[] args) throws IOException {
 		if (!Files.exists(CONFIG_DIR)) {
 			Files.createDirectories(CONFIG_DIR);
 		}
 
+		System.out.println("Config: " + CONFIG_FILE.toFile().getAbsolutePath());
 		if (!Files.exists(CONFIG_FILE)) {
 			Files.writeString(CONFIG_FILE, """
 					db.username=user
