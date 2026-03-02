@@ -28,6 +28,7 @@ import org.springframework.web.client.RestTemplate;
 
 import lu.kbra.pclib.datastructure.pair.Pair;
 import lu.kbra.pclib.datastructure.pair.Pairs;
+import lu.kbra.pclib.db.config.DataBaseInitializer;
 import lu.kbra.restopolis_bots.db.data.MealData;
 import lu.kbra.restopolis_bots.db.data.MealSectionData;
 import lu.kbra.restopolis_bots.db.data.RestaurantData;
@@ -51,6 +52,8 @@ public class RestopolisFetcher {
 
 	@Autowired
 	private RestTemplate restTemplate;
+	@Autowired
+	private DataBaseInitializer dataBaseInitializer;
 
 	@Value("${restopolis.url}")
 	private String targetUrl;
@@ -70,6 +73,8 @@ public class RestopolisFetcher {
 
 	@Scheduled(cron = "0 0 8 * * *")
 	public void runListFetch() throws IOException {
+		dataBaseInitializer.keepAlive();
+
 		final Document doc = Jsoup.parse(fetchHtmlWithCookies(targetUrl, null));
 		doc.select("div.restaurant-selector-list > h3.site").forEach(c -> {
 			final String dataSite = c.attr("data-site");
@@ -143,14 +148,17 @@ public class RestopolisFetcher {
 
 			return Pairs.readOnly(date, map);
 		} catch (Exception e) {
-			LOGGER.warning("Error on fetch restaurant " + restaurant.getId() + " (" + restaurant.getName() + "): " + e.getMessage()
-					+ " (" + e.getClass().getName() + ")");
+			LOGGER
+					.warning("Error on fetch restaurant " + restaurant.getId() + " (" + restaurant.getName() + "): " + e.getMessage() + " ("
+							+ e.getClass().getName() + ")");
 			return null;
 		}
 	}
 
 	@Scheduled(cron = "0 30 8 * * *")
 	public void runMenuFetch() {
+		dataBaseInitializer.keepAlive();
+
 		restaurantTable.all().forEachRemaining(restaurant -> {
 			final Pair<LocalDate, Map<String, List<String>>> pair = fetchForRestaurant(restaurant);
 			if (pair == null) {
