@@ -13,8 +13,7 @@ import lu.kbra.restopolis_bots.db.data.discord.DiscordPlatformData;
 import lu.kbra.restopolis_bots.db.table.TargetPlatformTable;
 
 @Component
-public class DiscordPlatformTable extends DeferredDataBaseTable<DiscordPlatformData>
-		implements TargetPlatformTable<DiscordPlatformData> {
+public class DiscordPlatformTable extends DeferredDataBaseTable<DiscordPlatformData> implements TargetPlatformTable<DiscordPlatformData> {
 
 	public DiscordPlatformTable(DataBase dataBase) {
 		super(dataBase);
@@ -34,6 +33,12 @@ public class DiscordPlatformTable extends DeferredDataBaseTable<DiscordPlatformD
 	@Override
 	public DiscordPlatformData updateAndReload(DiscordPlatformData data) {
 		return super.updateAndReload(data);
+	}
+
+	@CacheEvict(cacheNames = "discordPlatform.serverId", key = "#data.serverId")
+	@Override
+	public DiscordPlatformData insertAndReload(DiscordPlatformData data) {
+		return super.insertAndReload(data);
 	}
 
 }

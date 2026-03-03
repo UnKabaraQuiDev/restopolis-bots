@@ -78,7 +78,7 @@ public class RBConfig {
 	}
 
 	@Bean
-	@Profile("!noRestopolis")
+	@Profile("!noDiscord")
 	public JDA jdaConfig(@Value("${discord.token}") String token) throws InterruptedException {
 		if (token == null || token.isBlank()) {
 			throw new IllegalStateException("Expecting discord token (" + RBMain.CONFIG_FILE.toFile().getAbsolutePath() + ")");

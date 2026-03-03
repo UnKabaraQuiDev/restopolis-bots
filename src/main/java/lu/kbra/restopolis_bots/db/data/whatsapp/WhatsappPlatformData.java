@@ -2,7 +2,6 @@ package lu.kbra.restopolis_bots.db.data.whatsapp;
 
 import lu.kbra.pclib.db.autobuild.column.Column;
 import lu.kbra.pclib.db.autobuild.column.ForeignKey;
-import lu.kbra.pclib.db.autobuild.column.Nullable;
 import lu.kbra.pclib.db.autobuild.column.PrimaryKey;
 import lu.kbra.pclib.db.autobuild.column.Unique;
 import lu.kbra.restopolis_bots.db.data.TargetPlatformData;
@@ -15,7 +14,7 @@ public class WhatsappPlatformData implements TargetPlatformData {
 	@ForeignKey(table = TargetTable.class)
 	protected long id;
 
-	@Column(length = 20)
+	@Column(length = 30)
 	@Unique
 	protected String chatId;
 

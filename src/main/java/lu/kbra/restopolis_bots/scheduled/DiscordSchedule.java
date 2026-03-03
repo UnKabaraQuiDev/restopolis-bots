@@ -35,7 +35,7 @@ import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 
 @Component
-@Profile("!noRestopolis")
+@Profile("!noDiscord")
 public class DiscordSchedule {
 
 	@Autowired

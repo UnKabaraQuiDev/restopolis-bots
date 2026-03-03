@@ -25,15 +25,21 @@ public class WhatsappPlatformTable extends DeferredDataBaseTable<WhatsappPlatfor
 		return TargetPlatform.WHATSAPP;
 	}
 
-	@Cacheable(cacheNames = "discordPlatform.serverId")
-	public Optional<WhatsappPlatformData> byServer(long serverId) {
-		return super.loadUniqueIfExists(new WhatsappPlatformData(Long.toString(serverId)));
+	@Cacheable(cacheNames = "whatsappPlatform.chatId")
+	public Optional<WhatsappPlatformData> byChat(String chatId) {
+		return super.loadUniqueIfExists(new WhatsappPlatformData(chatId));
 	}
 
-	@CacheEvict(cacheNames = "discordPlatform.serverId", key = "#data.serverId")
+	@CacheEvict(cacheNames = "whatsappPlatform.chatId", key = "#data.chatId")
 	@Override
 	public WhatsappPlatformData updateAndReload(WhatsappPlatformData data) {
 		return super.updateAndReload(data);
+	}
+
+	@CacheEvict(cacheNames = "whatsappPlatform.chatId", key = "#data.chatId")
+	@Override
+	public WhatsappPlatformData insertAndReload(WhatsappPlatformData data) {
+		return super.insertAndReload(data);
 	}
 
 }

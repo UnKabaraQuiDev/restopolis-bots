@@ -40,13 +40,16 @@ public class RestaurantTable extends DeferredDataBaseTable<RestaurantData> {
 		return super.load(new RestaurantData(restaurantId));
 	}
 
+//	@Cacheable(cacheNames = "restaurants.id-opt")
+	public Optional<RestaurantData> optById(long restaurantId) {
+		return super.loadIfExists(new RestaurantData(restaurantId));
+	}
+
 	@Cacheable(cacheNames = "restaurants.likeName")
 	public List<RestaurantData> likeName(String value, int maxChoices) {
 		return super.query(
 				QueryBuilder.<RestaurantData>select().limit(maxChoices).where(cb -> cb.match("name", "LIKE", "%" + value + "%")).list());
 	}
-
-	
 
 	@Cacheable(cacheNames = "restaurants.name")
 	public Optional<RestaurantData> byName(String restaurantName) {
@@ -57,7 +60,10 @@ public class RestaurantTable extends DeferredDataBaseTable<RestaurantData> {
 			put = {
 					@CachePut(cacheNames = "restaurants.id", key = "#data.id"),
 					@CachePut(cacheNames = "restaurants.name", key = "#data.name") },
-			evict = { @CacheEvict(cacheNames = "restaurants.likeName", allEntries = true) }
+			evict = { @CacheEvict(cacheNames = "restaurants.likeName", allEntries = true)
+			/*
+			 * @CacheEvict(cacheNames = "restaurants.optById", key = "#data.id")
+			 */ }
 	)
 	@Override
 	public RestaurantData updateAndReload(RestaurantData data) {
