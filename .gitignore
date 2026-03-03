@@ -59,4 +59,5 @@ Thumbs.db
 .factorypath
 
 config/
+!src/main/java/lu/kbra/restopolis_bots/config/
 deploy/
