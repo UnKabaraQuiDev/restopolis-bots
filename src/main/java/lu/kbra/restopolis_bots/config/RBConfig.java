@@ -12,6 +12,7 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -63,6 +64,7 @@ public class RBConfig {
 	}
 
 	@Bean
+	@Profile("!noRestopolis")
 	public JDA jdaConfig(@Value("${discord.token}") String token) throws InterruptedException {
 		if (token == null || token.isBlank()) {
 			throw new IllegalStateException("Expecting discord token (" + RBMain.CONFIG_FILE.toFile().getAbsolutePath() + ")");

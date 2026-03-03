@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -34,6 +35,7 @@ import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 
 @Component
+@Profile("!noRestopolis")
 public class DiscordSchedule {
 
 	@Autowired
@@ -151,7 +153,7 @@ public class DiscordSchedule {
 	}
 
 	private int index = 0;
-	private final String[] messages = { "Yum yum", "Blergh", "Mew >:3c", "Ratin' good foog"};
+	private final String[] messages = { "Yum yum", "Blergh", "Mew >:3c", "Ratin' good foog" };
 
 	@Scheduled(fixedRate = 60000)
 	public void changeActivity() {
