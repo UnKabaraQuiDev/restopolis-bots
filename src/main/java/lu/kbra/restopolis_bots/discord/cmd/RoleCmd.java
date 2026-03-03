@@ -1,4 +1,4 @@
-package lu.kbra.restopolis_bots.cmd;
+package lu.kbra.restopolis_bots.discord.cmd;
 
 import java.time.DayOfWeek;
 import java.util.ArrayList;
@@ -12,17 +12,17 @@ import lu.kbra.restopolis_bots.db.data.TargetData;
 import lu.kbra.restopolis_bots.db.data.discord.DiscordPlatformData;
 import lu.kbra.restopolis_bots.db.table.TargetTable;
 import lu.kbra.restopolis_bots.db.table.discord.DiscordPlatformTable;
-import lu.kbra.restopolis_bots.menu.ChannelSelectMenu;
+import lu.kbra.restopolis_bots.discord.menu.RoleSelectMenu;
 import lu.rescue_rush.spring.jda.command.slash.SlashCommandExecutor;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.components.actionrow.ActionRow;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
-@Component("channel")
-public class ChannelCmd implements SlashCommandExecutor {
+@Component("role")
+public class RoleCmd implements SlashCommandExecutor {
 
 	@Autowired
-	private ChannelSelectMenu channelSelectMenu;
+	private RoleSelectMenu roleSelectMenu;
 	@Autowired
 	private TargetTable targetTable;
 	@Autowired
@@ -57,9 +57,9 @@ public class ChannelCmd implements SlashCommandExecutor {
 				});
 		event
 				.getHook()
-				.sendMessage("Select your channel:")
+				.sendMessage("Select your role:")
 				.setEphemeral(true)
-				.addComponents(ActionRow.of(channelSelectMenu.build(discordPlatformData.getChannelId())))
+				.addComponents(ActionRow.of(roleSelectMenu.build(discordPlatformData.getRoleId())))
 				.queue();
 
 	}

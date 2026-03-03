@@ -1,4 +1,4 @@
-package lu.kbra.restopolis_bots.db.data.discord;
+package lu.kbra.restopolis_bots.db.data;
 
 import lu.kbra.pclib.db.impl.DataBaseEntry;
 

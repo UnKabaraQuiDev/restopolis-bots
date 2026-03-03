@@ -12,6 +12,7 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
@@ -22,9 +23,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lu.kbra.pclib.db.connector.DataBaseConnectorFactory;
 import lu.kbra.pclib.db.connector.MySQLDataBaseConnector;
+import lu.kbra.pclib.db.utils.SpringDataBaseEntryUtils;
 import lu.kbra.restopolis_bots.RBMain;
 import lu.kbra.restopolis_bots.data.TargetPlatform;
-import lu.kbra.restopolis_bots.db.table.discord.TargetPlatformTable;
+import lu.kbra.restopolis_bots.db.table.TargetPlatformTable;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
@@ -32,7 +34,7 @@ import net.dv8tion.jda.api.entities.Activity;
 @Configuration
 @EnableScheduling
 @EnableCaching
-@EnableConfigurationProperties({ DbConfigData.class })
+@EnableConfigurationProperties({ DbConfigData.class, WahaConfigData.class })
 public class RBConfig {
 
 	@Lazy
@@ -47,11 +49,23 @@ public class RBConfig {
 	}
 
 	@Bean
+	public SpringDataBaseEntryUtils defaultSpringDataBaseEntryUtils(
+			final ObjectMapper objectMapper,
+			final ConversionService conversionService) {
+		return new SpringDataBaseEntryUtils(objectMapper, conversionService);
+	}
+
+	@Bean
+	@Primary
+//	@Profile("noWhatsapp")
 	public ObjectMapper objectMapper() {
 		return new ObjectMapper();
 	}
 
 	@Bean
+	@Primary
+//	@ConditionalOnMissingClass("org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration")
+//	@Profile("noWhatsapp")
 	public ConversionService conversionService() {
 		return new ApplicationConversionService();
 	}

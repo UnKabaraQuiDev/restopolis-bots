@@ -1,4 +1,4 @@
-package lu.kbra.restopolis_bots.cmd;
+package lu.kbra.restopolis_bots.discord.cmd;
 
 import java.time.DayOfWeek;
 import java.util.ArrayList;
@@ -22,7 +22,7 @@ import lu.kbra.restopolis_bots.db.table.TargetRestaurantSectionTable;
 import lu.kbra.restopolis_bots.db.table.TargetTable;
 import lu.kbra.restopolis_bots.db.table.discord.DiscordPlatformTable;
 import lu.kbra.restopolis_bots.db.view.TargetRestaurantView;
-import lu.kbra.restopolis_bots.menu.RestaurantSectionSelectMenu;
+import lu.kbra.restopolis_bots.discord.menu.RestaurantSectionSelectMenu;
 import lu.rescue_rush.spring.jda.command.slash.SlashCommandAutocomplete;
 import lu.rescue_rush.spring.jda.command.slash.SlashCommandExecutor;
 import lu.rescue_rush.spring.jda.command.slash.SubSlashCommandExecutor;

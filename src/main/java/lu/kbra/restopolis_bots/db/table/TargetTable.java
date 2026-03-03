@@ -14,8 +14,7 @@ import lu.kbra.pclib.db.table.DBException;
 import lu.kbra.pclib.db.table.DeferredDataBaseTable;
 import lu.kbra.restopolis_bots.data.TargetPlatform;
 import lu.kbra.restopolis_bots.db.data.TargetData;
-import lu.kbra.restopolis_bots.db.data.discord.TargetPlatformData;
-import lu.kbra.restopolis_bots.db.table.discord.TargetPlatformTable;
+import lu.kbra.restopolis_bots.db.data.TargetPlatformData;
 
 @Component
 public class TargetTable extends DeferredDataBaseTable<TargetData> {

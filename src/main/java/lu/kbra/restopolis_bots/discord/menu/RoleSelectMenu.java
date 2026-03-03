@@ -1,4 +1,4 @@
-package lu.kbra.restopolis_bots.menu;
+package lu.kbra.restopolis_bots.discord.menu;
 
 import java.time.DayOfWeek;
 import java.util.ArrayList;

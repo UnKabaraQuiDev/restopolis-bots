@@ -5,6 +5,7 @@ import lu.kbra.pclib.db.autobuild.column.ForeignKey;
 import lu.kbra.pclib.db.autobuild.column.Nullable;
 import lu.kbra.pclib.db.autobuild.column.PrimaryKey;
 import lu.kbra.pclib.db.autobuild.column.Unique;
+import lu.kbra.restopolis_bots.db.data.TargetPlatformData;
 import lu.kbra.restopolis_bots.db.table.TargetTable;
 
 public class DiscordPlatformData implements TargetPlatformData {
