@@ -119,7 +119,11 @@ public class WhatsappService {
 				return;
 			}
 			final List<RestaurantData> list = this.restaurantTable.likeName(name, 25);
-			this.sendRestaurantQuery(chatId, list);
+			if (list.size() == 1) {
+				this.sendSectionQuery(chatId, list.get(0));
+			} else {
+				this.sendRestaurantQuery(chatId, list);
+			}
 		}
 		case "subscribe" -> {
 			if (split.length == 1) {
@@ -181,6 +185,7 @@ public class WhatsappService {
 		}
 		case "schedule" -> {
 			if (split.length == 1) {
+				sendCurrentSchedule(chatId);
 				return;
 			}
 
@@ -199,6 +204,17 @@ public class WhatsappService {
 			targetTable.updateAndReload(targetData);
 
 			sendCurrentSchedule(chatId);
+		}
+		case "help" -> {
+			wahaHttpClient.sendText(chatId, """
+					*Commands:*
+
+					* _/select [restaurant name]_: Returns a list of all the restaurants matching this name.
+					* _/select [restaurant id]_: Returns a list of all the sections from that restaurant.
+					* _/subscribe [section id],..._: Subscribe to the sections with that id.
+					* _/unsubscribe [section id],..._: Unsubscribe to the sections with that id.
+					* _/schedule [day id],..._: Select the days of the week you wish to receive updates.
+					* _/show_: Shows the current config for this chat.""");
 		}
 		}
 

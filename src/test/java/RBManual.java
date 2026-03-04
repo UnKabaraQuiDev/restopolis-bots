@@ -12,6 +12,7 @@ import lu.kbra.restopolis_bots.db.data.RestaurantData;
 import lu.kbra.restopolis_bots.db.table.RestaurantTable;
 import lu.kbra.restopolis_bots.scheduled.DiscordSchedule;
 import lu.kbra.restopolis_bots.scheduled.RestopolisFetcher;
+import lu.kbra.restopolis_bots.scheduled.WhatsappSchedule;
 import lu.rescue_rush.spring.jda.DiscordSenderService;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -27,6 +28,9 @@ public class RBManual {
 	private DiscordSenderService discordSenderService;
 	@Autowired(required = false)
 	private DiscordSchedule discordSchedule;
+
+	@Autowired(required = false)
+	private WhatsappSchedule whatsappSchedule;
 
 	@BeforeAll
 	@Disabled
@@ -53,7 +57,7 @@ public class RBManual {
 	}
 
 	@Test
-//	@Disabled
+	@Disabled
 	public void fetchMenus() {
 		System.err.println("fetching menus");
 		restopolisFetcher.runMenuFetch();
@@ -61,7 +65,7 @@ public class RBManual {
 
 	@Test
 	@Disabled
-	public void testMessage() throws InterruptedException {
+	public void testMessageDiscord() throws InterruptedException {
 		System.err.println("running discord targets");
 		discordSchedule.runTargets();
 
@@ -69,6 +73,15 @@ public class RBManual {
 			System.err.println("waiting for messages");
 			discordSenderService.shutdown();
 		}
+	}
+
+	@Test
+//	@Disabled
+	public void testMessageWhatsapp() throws InterruptedException {
+		System.err.println("running whatsapp targets");
+		whatsappSchedule.runTargets();
+
+		Thread.sleep(2000);
 	}
 
 }
