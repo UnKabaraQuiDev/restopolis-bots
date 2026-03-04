@@ -5,6 +5,7 @@ import lu.kbra.pclib.db.autobuild.column.ForeignKey;
 import lu.kbra.pclib.db.autobuild.column.Nullable;
 import lu.kbra.pclib.db.autobuild.column.PrimaryKey;
 import lu.kbra.pclib.db.autobuild.column.Unique;
+import lu.kbra.pclib.db.autobuild.table.ForeignKeyData.OnAction;
 import lu.kbra.restopolis_bots.db.data.TargetPlatformData;
 import lu.kbra.restopolis_bots.db.table.TargetTable;
 
@@ -12,7 +13,7 @@ public class DiscordPlatformData implements TargetPlatformData {
 
 	@PrimaryKey
 	@Column
-	@ForeignKey(table = TargetTable.class)
+	@ForeignKey(table = TargetTable.class, onDelete = OnAction.CASCADE)
 	protected long id;
 
 	// channel id for dm

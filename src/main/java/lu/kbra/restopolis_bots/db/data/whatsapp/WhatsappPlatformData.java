@@ -4,6 +4,7 @@ import lu.kbra.pclib.db.autobuild.column.Column;
 import lu.kbra.pclib.db.autobuild.column.ForeignKey;
 import lu.kbra.pclib.db.autobuild.column.PrimaryKey;
 import lu.kbra.pclib.db.autobuild.column.Unique;
+import lu.kbra.pclib.db.autobuild.table.ForeignKeyData.OnAction;
 import lu.kbra.restopolis_bots.db.data.TargetPlatformData;
 import lu.kbra.restopolis_bots.db.table.TargetTable;
 
@@ -11,7 +12,7 @@ public class WhatsappPlatformData implements TargetPlatformData {
 
 	@PrimaryKey
 	@Column
-	@ForeignKey(table = TargetTable.class)
+	@ForeignKey(table = TargetTable.class, onDelete = OnAction.CASCADE)
 	protected long id;
 
 	@Column(length = 30)

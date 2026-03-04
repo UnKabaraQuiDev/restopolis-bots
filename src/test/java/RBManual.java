@@ -38,7 +38,7 @@ public class RBManual {
 	}
 
 	@Test
-	@Disabled
+//	@Disabled
 	public void testSite() throws IOException {
 		System.err.println("fetching sites");
 		restopolisFetcher.runListFetch();
@@ -53,7 +53,7 @@ public class RBManual {
 	}
 
 	@Test
-	@Disabled
+//	@Disabled
 	public void fetchMenus() {
 		System.err.println("fetching menus");
 		restopolisFetcher.runMenuFetch();

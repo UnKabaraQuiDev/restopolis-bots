@@ -84,7 +84,7 @@ public class SelectCmd implements SlashCommandExecutor {
 								.setEphemeral(true)
 								.queue();
 					}, () -> {
-						event.getHook().sendMessage("No data for this channel.").setEphemeral(true).queue();
+						event.getHook().sendMessage("No data for this server/channel.").setEphemeral(true).queue();
 					});
 		}
 

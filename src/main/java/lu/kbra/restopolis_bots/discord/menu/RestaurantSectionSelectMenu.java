@@ -86,7 +86,6 @@ public class RestaurantSectionSelectMenu implements DiscordStringMenu, DiscordSt
 				.sendMessage("**Your restaurants:**\n" + (msg == null || msg.isBlank() ? "*No content*" : msg))
 				.setEphemeral(true)
 				.queue();
-		;
 	}
 
 	@Override

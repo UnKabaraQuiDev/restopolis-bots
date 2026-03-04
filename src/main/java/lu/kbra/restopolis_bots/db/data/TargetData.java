@@ -1,6 +1,8 @@
 package lu.kbra.restopolis_bots.db.data;
 
 import java.time.DayOfWeek;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import lu.kbra.pclib.db.autobuild.column.AutoIncrement;
@@ -52,8 +54,12 @@ public class TargetData implements DataBaseEntry {
 
 	@Override
 	public String toString() {
-		return "TargetData@" + System.identityHashCode(this) + " [id=" + id + ", targetPlatform=" + targetPlatform
-				+ ", days=" + days + "]";
+		return "TargetData@" + System.identityHashCode(this) + " [id=" + id + ", targetPlatform=" + targetPlatform + ", days=" + days + "]";
+	}
+
+	public static List<DayOfWeek> allDays() {
+		return new ArrayList<>(
+				Arrays.asList(DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY, DayOfWeek.FRIDAY));
 	}
 
 }
