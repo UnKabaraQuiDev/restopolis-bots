@@ -48,6 +48,7 @@ public class RBMain {
 					db.port=3306
 					db.name=restopolis_bots
 					discord.token=
+					discord.admin.userId=654203563869863956
 										""");
 			System.out.println("Created empty config to: " + CONFIG_FILE.toFile().getAbsolutePath());
 			return;
