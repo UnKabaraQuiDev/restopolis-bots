@@ -24,9 +24,9 @@ public class MealTable extends DeferredDataBaseTable<MealData> {
 	}
 
 	@Scheduled(cron = "0 59 23 * * *")
-	@CacheEvict(cacheNames = "meal.today-restaurantId")
+	@CacheEvict(cacheNames = "meal.today-restaurantId", allEntries = true)
 	public void clearCache() {
-		System.err.println("Created cache 'meal.today - restaurantId'.");
+//		System.err.println("Created cache 'meal.today - restaurantId'.");
 	}
 
 }
