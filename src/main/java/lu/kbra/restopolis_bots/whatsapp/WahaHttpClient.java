@@ -12,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -33,13 +34,27 @@ public class WahaHttpClient {
 	@Scheduled(fixedDelay = 10, timeUnit = TimeUnit.MINUTES)
 	public boolean ensureInit() {
 		try {
-			return restTemplate
-					.postForEntity(configData.getUrl() + "/sessions/" + session + "/start",
-							new HttpEntity<>(this.makeHeaders()),
-							String.class)
-					.getStatusCode()
-					.is2xxSuccessful();
-		} catch (Exception e) {
+			final ResponseEntity<String> response = this.restTemplate.postForEntity(this.configData.getUrl() + "/sessions/" + this.session
+					+ "/start", new HttpEntity<>(this.makeHeaders()), String.class);
+
+			final int status = response.getStatusCode().value();
+
+			if (!(response.getStatusCode().is2xxSuccessful() || status == 422)) {
+				System.err.println("Unexpected response when starting default session: " + status);
+			}
+
+			return response.getStatusCode().is2xxSuccessful();
+
+		} catch (final HttpStatusCodeException e) {
+			final int status = e.getStatusCode().value();
+
+			if (status != 422) {
+				System.err.println("Unexpected response when starting default session: " + status);
+			}
+
+			return status == 422;
+
+		} catch (final Exception e) {
 			System.err.println("Exception when starting default session: " + e.getMessage());
 			return false;
 		}
@@ -59,7 +74,7 @@ public class WahaHttpClient {
 		return this.restTemplate.postForObject(url, entity, String.class);
 	}
 
-	public String sendText(final String chatId, final String text, List<String> mentions) {
+	public String sendText(final String chatId, final String text, final List<String> mentions) {
 		final String url = this.configData.getUrl() + "/sendText";
 		final Map<String, Object> body = Map.of("session", this.session, "chatId", chatId, "text", text, "mentions", mentions);
 		final HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, this.makeHeaders());
@@ -78,7 +93,7 @@ public class WahaHttpClient {
 
 	public boolean isSenderAdmin(final String groupId, String sender) {
 		if (sender.contains("@lid")) {
-			sender = resolveSenderPN(sender);
+			sender = this.resolveSenderPN(sender);
 		}
 		if (sender == null || sender.isBlank()) {
 			return false;
@@ -97,9 +112,9 @@ public class WahaHttpClient {
 		return false;
 	}
 
-	public String resolveSenderPN(String sender) {
+	public String resolveSenderPN(final String sender) {
 		return this.restTemplate
-				.exchange(configData.getUrl() + "/" + session + "/lids/" + sender,
+				.exchange(this.configData.getUrl() + "/" + this.session + "/lids/" + sender,
 						HttpMethod.GET,
 						new HttpEntity<>(this.makeHeaders()),
 						JsonNode.class)
@@ -108,7 +123,7 @@ public class WahaHttpClient {
 				.asText();
 	}
 
-	public String sendPollVote(String chatId, String pollMessageId, List<String> choices) {
+	public String sendPollVote(final String chatId, final String pollMessageId, final List<String> choices) {
 		final String url = this.configData.getUrl() + "/sendPollVote";
 
 		final Map<String, Object> body = Map
