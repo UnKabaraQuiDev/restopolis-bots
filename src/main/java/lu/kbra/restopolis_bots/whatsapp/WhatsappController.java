@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import jakarta.annotation.PostConstruct;
+
 @RestController
 @RequestMapping("/whatsapp")
 @Profile("!noWhatsapp")
@@ -17,10 +19,15 @@ public class WhatsappController {
 
 	@Autowired
 	private WhatsappService whatsappService;
+	
+	@PostConstruct
+	public void init() {
+		System.out.println("Exposing /whatsapp/webhook");
+	}
 
 	@PostMapping("/webhook")
 	public ResponseEntity<Void> webhook(@RequestBody JsonNode payload) {
-		System.out.println(payload.path("event").asText() + ": " + payload.toString());
+//		System.out.println(payload.path("event").asText() + ": " + payload.toString());
 
 		if (payload.at("/payload/fromMe").asBoolean()) {
 			return ResponseEntity.ok().build();

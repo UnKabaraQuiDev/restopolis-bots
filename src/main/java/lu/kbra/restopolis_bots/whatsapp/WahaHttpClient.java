@@ -2,6 +2,7 @@ package lu.kbra.restopolis_bots.whatsapp;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -9,6 +10,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -26,6 +28,21 @@ public class WahaHttpClient {
 	public WahaHttpClient(final WahaConfigData configData) {
 		this.restTemplate = new RestTemplate();
 		this.configData = configData;
+	}
+
+	@Scheduled(fixedDelay = 10, timeUnit = TimeUnit.MINUTES)
+	public boolean ensureInit() {
+		try {
+			return restTemplate
+					.postForEntity(configData.getUrl() + "/sessions/" + session + "/start",
+							new HttpEntity<>(this.makeHeaders()),
+							String.class)
+					.getStatusCode()
+					.is2xxSuccessful();
+		} catch (Exception e) {
+			System.err.println("Exception when starting default session: " + e.getMessage());
+			return false;
+		}
 	}
 
 	private HttpHeaders makeHeaders() {
