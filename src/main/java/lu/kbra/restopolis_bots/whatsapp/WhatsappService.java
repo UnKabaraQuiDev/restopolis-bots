@@ -64,8 +64,9 @@ public class WhatsappService {
 		final String messageId = payload.at("/payload/poll/id").asText();
 
 		final WhatsappPlatformData whatsappPlatformData = this.whatsappPlatformTable.byChat(chatId).orElseGet(() -> {
-			final TargetData td = this.targetTable.insertAndReload(new TargetData(TargetPlatform.WHATSAPP,
-					Arrays.asList(DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY, DayOfWeek.FRIDAY)));
+			final TargetData td = this.targetTable
+					.insertAndReload(new TargetData(TargetPlatform.WHATSAPP,
+							Arrays.asList(DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY, DayOfWeek.FRIDAY)));
 			return this.whatsappPlatformTable.insertAndReload(new WhatsappPlatformData(td.getId(), chatId));
 		});
 
@@ -76,7 +77,8 @@ public class WhatsappService {
 			this.wahaHttpClient.sendText(chatId, String.join("\n", selected));
 		}
 
-		final List<RestaurantSectionData> restaurantSections = this.targetRestaurantSectionTable.byTarget(whatsappPlatformData.getId())
+		final List<RestaurantSectionData> restaurantSections = this.targetRestaurantSectionTable
+				.byTarget(whatsappPlatformData.getId())
 				.stream()
 				.map(c -> this.restaurantSectionTable.byId(c.getRestaurantSectionId()))
 				.sorted(Comparator.comparing(RestaurantSectionData::getRestaurantId))
@@ -84,15 +86,20 @@ public class WhatsappService {
 	}
 
 	public void incomingMessage(final JsonNode payload) {
+//		System.err.println(payload.toPrettyString());
+
 		final String chatId = payload.at("/payload/from").asText();
-		final String from = payload.at("/payload/participant").asText();
+		final String participant = payload.at("/payload/participant").asText() == null
+				|| payload.at("/payload/participant").asText().isBlank() ? chatId : payload.at("/payload/participant").asText();
 		final String content = payload.at("/payload/body").asText();
 
-		if (from == null || from.isBlank() || chatId == null || chatId.isBlank() || content == null || content.isBlank()) {
+//		System.err.println(participant + ":" + chatId + ":" + content);
+
+		if (participant == null || participant.isBlank() || chatId == null || chatId.isBlank() || content == null || content.isBlank()) {
 			return;
 		}
 
-		if (!content.startsWith("/") || (chatId.contains("@g.us") && !this.wahaHttpClient.isSenderAdmin(chatId, from))) {
+		if (!content.startsWith("/") || (chatId.contains("@g.us") && !this.wahaHttpClient.isSenderAdmin(chatId, participant))) {
 			return;
 		}
 
@@ -133,7 +140,8 @@ public class WhatsappService {
 				return this.whatsappPlatformTable.insertAndReload(new WhatsappPlatformData(td.getId(), chatId));
 			});
 			final String allIds = IntStream.range(1, split.length).mapToObj(c -> split[c]).collect(Collectors.joining(" "));
-			Arrays.stream(allIds.split(","))
+			Arrays
+					.stream(allIds.split(","))
 					.map(String::trim)
 					.filter(c -> c.matches("\\d+"))
 					.mapToInt(Integer::parseInt)
@@ -150,7 +158,8 @@ public class WhatsappService {
 
 			if (split.length == 2 && "all".equalsIgnoreCase(split[1])) {
 				this.whatsappPlatformTable.byChat(chatId).ifPresent(whatsappPlatformData -> {
-					this.targetRestaurantSectionTable.byTarget(whatsappPlatformData.getId())
+					this.targetRestaurantSectionTable
+							.byTarget(whatsappPlatformData.getId())
 							.forEach(this.targetRestaurantSectionTable::deleteIfExists);
 					this.whatsappPlatformTable.deleteIfExists(whatsappPlatformData);
 					this.targetTable.deleteIfExists(this.targetTable.byId(whatsappPlatformData.getId()));
@@ -166,7 +175,8 @@ public class WhatsappService {
 				return this.whatsappPlatformTable.insertAndReload(new WhatsappPlatformData(td.getId(), chatId));
 			});
 			final String allIds = IntStream.range(1, split.length).mapToObj(c -> split[c]).collect(Collectors.joining(" "));
-			Arrays.stream(allIds.split(","))
+			Arrays
+					.stream(allIds.split(","))
 					.map(String::trim)
 					.filter(c -> c.matches("\\d+"))
 					.mapToInt(Integer::parseInt)
@@ -190,8 +200,9 @@ public class WhatsappService {
 				return this.whatsappPlatformTable.insertAndReload(new WhatsappPlatformData(td.getId(), chatId));
 			});
 			final TargetData targetData = this.targetTable.byId(whatsappPlatformData);
-			targetData.setDays(
-					Arrays.stream(IntStream.range(1, split.length).mapToObj(c -> split[c]).collect(Collectors.joining(" ")).split(","))
+			targetData
+					.setDays(Arrays
+							.stream(IntStream.range(1, split.length).mapToObj(c -> split[c]).collect(Collectors.joining(" ")).split(","))
 							.map(String::trim)
 							.mapToInt(Integer::parseInt)
 							.mapToObj(DayOfWeek::of)
@@ -223,33 +234,39 @@ public class WhatsappService {
 		this.whatsappPlatformTable.byChat(chatId).ifPresentOrElse(whatsappPlatformData -> {
 			final TargetData targetData = this.targetTable.byId(whatsappPlatformData.getId());
 
-			final String msg = Arrays.stream(DayOfWeek.values())
+			final String msg = Arrays
+					.stream(DayOfWeek.values())
 					.map(c -> (targetData.getDays().contains(c) ? "✅" : "❌") + " ```"
 							+ PCUtils.leftPadString(Long.toString(c.getValue()), " ", 5) + "```: *" + c.name() + "*")
 					.collect(Collectors.joining("\n"));
 
-			this.wahaHttpClient.sendText(chatId,
-					"*Your schedule:*\n" + (msg == null || msg.isBlank() ? "_No content_, use _/schedule [day id],..._ to start !"
-							: "Use _/schedule [day id],..._ to set the days you wish to receive updates\n\n" + msg));
+			this.wahaHttpClient
+					.sendText(chatId,
+							"*Your schedule:*\n" + (msg == null || msg.isBlank() ? "_No content_, use _/schedule [day id],..._ to start !"
+									: "Use _/schedule [day id],..._ to set the days you wish to receive updates\n\n" + msg));
 		}, () -> this.wahaHttpClient.sendText(chatId, "No data for this chat, use _/schedule [day],..._ to start !"));
 	}
 
 	private void sendCurrentSections(final String chatId) {
 		this.whatsappPlatformTable.byChat(chatId).ifPresentOrElse(whatsappPlatformData -> {
-			final List<RestaurantSectionData> restaurantSections = this.targetRestaurantSectionTable.byTarget(whatsappPlatformData.getId())
+			final List<RestaurantSectionData> restaurantSections = this.targetRestaurantSectionTable
+					.byTarget(whatsappPlatformData.getId())
 					.stream()
 					.map(c -> this.restaurantSectionTable.byId(c.getRestaurantSectionId()))
 					.sorted(Comparator.comparing(RestaurantSectionData::getRestaurantId))
 					.toList();
-			final String msg = restaurantSections.stream()
+			final String msg = restaurantSections
+					.stream()
 					.map(c -> "* *" + this.restaurantTable.byId(c.getRestaurantId()).getName() + "* (```" + c.getRestaurantId() + "```): "
 							+ c.getName() + " (```" + c.getId() + "```)")
 					.collect(Collectors.joining("\n"));
 
-			this.wahaHttpClient.sendText(chatId,
-					"*Your restaurants:*\n" + (msg == null || msg.isBlank() ? "_No content_, use _/select [restaurant name]_ to start !"
-							: "Use _/select [restaurant name/id]_ to add a restaurant\nand _/subscribe [section id],..._ or _/unsubscribe [section id],..._ to select more sections\n\n"
-									+ msg));
+			this.wahaHttpClient
+					.sendText(chatId,
+							"*Your restaurants:*\n" + (msg == null || msg.isBlank()
+									? "_No content_, use _/select [restaurant name]_ to start !"
+									: "Use _/select [restaurant name/id]_ to add a restaurant\nand _/subscribe [section id],..._ or _/unsubscribe [section id],..._ to select more sections\n\n"
+											+ msg));
 		}, () -> this.wahaHttpClient.sendText(chatId, "No data for this chat, use _/select [restaurant name]_ to start !"));
 	}
 
@@ -257,35 +274,43 @@ public class WhatsappService {
 		if (list.isEmpty()) {
 			this.wahaHttpClient.sendText(from, "No matching restaurant found. :(");
 		} else {
-			this.wahaHttpClient.sendText(from,
-					"Use: _/select [restaurant id]_\n\n*ID: Restaurant's name*\n" + list.stream()
-							.map(c -> "```" + PCUtils.leftPadString(Long.toString(c.getId()), " ", 5) + "```" + ": " + c.getName())
-							.collect(Collectors.joining("\n")));
+			this.wahaHttpClient
+					.sendText(from,
+							"Use: _/select [restaurant id]_\n\n*ID: Restaurant's name*\n" + list
+									.stream()
+									.map(c -> "```" + PCUtils.leftPadString(Long.toString(c.getId()), " ", 5) + "```" + ": " + c.getName())
+									.collect(Collectors.joining("\n")));
 		}
 	}
 
 	private void sendSectionQuery(final String chatId, final RestaurantData restaurantData) {
 		this.whatsappPlatformTable.byChat(chatId).ifPresentOrElse(whatsappPlatformData -> {
-			final Set<Long> set = this.targetRestaurantSectionTable.byTarget(whatsappPlatformData.getId())
+			final Set<Long> set = this.targetRestaurantSectionTable
+					.byTarget(whatsappPlatformData.getId())
 					.stream()
 					.map(TargetRestaurantSectionData::getRestaurantSectionId)
 					.collect(Collectors.toSet());
-			this.wahaHttpClient.sendText(chatId,
-					"Select sections for: *" + restaurantData.getName() + "* (```" + restaurantData.getId()
-							+ "```)\nUse: _subscribe [section id],..._ or _unsubscribe [section id],..._\n\n*ID: Section Name*\n"
-							+ this.restaurantSectionTable.byRestaurant(restaurantData.getId())
-									.stream()
-									.map(c -> (set.contains(c.getId()) ? "✅" : "❌") + " ```"
-											+ PCUtils.leftPadString(Long.toString(c.getId()), " ", 5) + "```" + ": " + c.getName())
-									.collect(Collectors.joining("\n")));
+			this.wahaHttpClient
+					.sendText(chatId,
+							"Select sections for: *" + restaurantData.getName() + "* (```" + restaurantData.getId()
+									+ "```)\nUse: _subscribe [section id],..._ or _unsubscribe [section id],..._\n\n*ID: Section Name*\n"
+									+ this.restaurantSectionTable
+											.byRestaurant(restaurantData.getId())
+											.stream()
+											.map(c -> (set.contains(c.getId()) ? "✅" : "❌") + " ```"
+													+ PCUtils.leftPadString(Long.toString(c.getId()), " ", 5) + "```" + ": " + c.getName())
+											.collect(Collectors.joining("\n")));
 		}, () -> {
-			this.wahaHttpClient.sendText(chatId,
-					"Select sections for: *" + restaurantData.getName() + "* (```" + restaurantData.getId()
-							+ "```)\nUse: _subscribe [section id],..._ or _unsubscribe [section id],..._\n\n*ID: Section Name*\n"
-							+ this.restaurantSectionTable.byRestaurant(restaurantData.getId())
-									.stream()
-									.map(c -> "```" + PCUtils.leftPadString(Long.toString(c.getId()), " ", 5) + "```" + ": " + c.getName())
-									.collect(Collectors.joining("\n")));
+			this.wahaHttpClient
+					.sendText(chatId,
+							"Select sections for: *" + restaurantData.getName() + "* (```" + restaurantData.getId()
+									+ "```)\nUse: _subscribe [section id],..._ or _unsubscribe [section id],..._\n\n*ID: Section Name*\n"
+									+ this.restaurantSectionTable
+											.byRestaurant(restaurantData.getId())
+											.stream()
+											.map(c -> "```" + PCUtils.leftPadString(Long.toString(c.getId()), " ", 5) + "```" + ": "
+													+ c.getName())
+											.collect(Collectors.joining("\n")));
 		});
 	}
 
