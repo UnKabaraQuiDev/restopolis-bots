@@ -1,4 +1,4 @@
-package lu.kbra.restopolis_bots.scheduled;
+package lu.kbra.restopolis_bots.whatsapp;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -28,7 +28,6 @@ import lu.kbra.restopolis_bots.db.table.RestaurantTable;
 import lu.kbra.restopolis_bots.db.table.TargetRestaurantSectionTable;
 import lu.kbra.restopolis_bots.db.table.TargetTable;
 import lu.kbra.restopolis_bots.db.table.whatsapp.WhatsappPlatformTable;
-import lu.kbra.restopolis_bots.whatsapp.WahaHttpClient;
 
 @Component
 @Profile("!noWhatsapp")

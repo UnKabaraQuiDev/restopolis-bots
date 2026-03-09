@@ -12,7 +12,7 @@ import lu.kbra.restopolis_bots.db.data.RestaurantData;
 import lu.kbra.restopolis_bots.db.table.RestaurantTable;
 import lu.kbra.restopolis_bots.discord.DiscordSchedule;
 import lu.kbra.restopolis_bots.scheduled.RestopolisFetcher;
-import lu.kbra.restopolis_bots.scheduled.WhatsappSchedule;
+import lu.kbra.restopolis_bots.whatsapp.WhatsappSchedule;
 import lu.rescue_rush.spring.jda.DiscordSenderService;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)

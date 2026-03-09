@@ -24,17 +24,18 @@ public class FetchCmd implements SlashCommandExecutor {
 	public void execute(SlashCommandInteractionEvent event) {
 		event.deferReply(true).queue();
 		if (!event.getUser().getId().equals(adminUserId)) {
-			event.getHook().sendMessage("You can't do that.").setEphemeral(true).queue();
+			event.getHook().editOriginal("You can't do that.").queue();
 			return;
 		}
-		event.getHook().sendMessage("OK.").setEphemeral(true).queue();
+
+		event.getHook().editOriginal("[0/2] Loading...").queue();
 		try {
 			restopolisFetcher.runListFetch();
-			event.getHook().sendMessage("Done fetching list.").setEphemeral(true).queue();
+			event.getHook().editOriginal("[1/2] Done fetching list.").queue();
 			restopolisFetcher.runMenuFetch();
-			event.getHook().sendMessage("Done fetching menus.").setEphemeral(true).queue();
+			event.getHook().editOriginal("[2/2] Done fetching menus.").queue();
 		} catch (Exception e) {
-			event.getHook().sendMessage("Failed:\n" + PCUtils.toString(e)).setEphemeral(true).queue();
+			event.getHook().editOriginal("[:x:/2] Failed:\n" + PCUtils.toString(e)).queue();
 		}
 	}
 

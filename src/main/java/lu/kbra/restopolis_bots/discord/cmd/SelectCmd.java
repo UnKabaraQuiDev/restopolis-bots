@@ -3,6 +3,7 @@ package lu.kbra.restopolis_bots.discord.cmd;
 import java.time.DayOfWeek;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,7 +38,7 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 public class SelectCmd implements SlashCommandExecutor {
 
 	@Override
-	public void execute(SlashCommandInteractionEvent event) {
+	public void execute(final SlashCommandInteractionEvent event) {
 
 	}
 
@@ -59,27 +60,38 @@ public class SelectCmd implements SlashCommandExecutor {
 		private TargetRestaurantSectionTable targetRestaurantSectionTable;
 
 		@Override
-		public void execute(SlashCommandInteractionEvent event) {
+		public void execute(final SlashCommandInteractionEvent event) {
 			event.deferReply(true).queue();
 			if (!event.getMember().hasPermission(event.getGuildChannel(), Permission.MANAGE_CHANNEL, Permission.MANAGE_SERVER)) {
 				event.getHook().sendMessage("You don't have the permission to do that.").setEphemeral(true).queue();
 				return;
 			}
-			discordPlatformTable
-					.byServer(event.isFromGuild() ? event.getGuild().getIdLong() : event.getChannelIdLong())
+			this.discordPlatformTable.byServer(event.isFromGuild() ? event.getGuild().getIdLong() : event.getChannelIdLong())
 					.ifPresentOrElse(discordPlatformData -> {
-						final List<RestaurantSectionData> restaurantSections = targetRestaurantSectionTable
+						final List<RestaurantSectionData> restaurantSections = this.targetRestaurantSectionTable
 								.byTarget(discordPlatformData.getId())
 								.stream()
-								.map(c -> restaurantSectionTable.byId(c.getRestaurantSectionId()))
-								.sorted((a, b) -> Long.compare(a.getRestaurantId(), b.getRestaurantId()))
+								.map(c -> this.restaurantSectionTable.byId(c.getRestaurantSectionId()))
+								.sorted(Comparator.comparing(RestaurantSectionData::getRestaurantId))
 								.toList();
-						final String msg = restaurantSections
+						final String msg = restaurantSections.stream()
+								.collect(Collectors.groupingBy(RestaurantSectionData::getRestaurantId))
+								.entrySet()
 								.stream()
-								.map(c -> "* __" + restaurantTable.byId(c.getRestaurantId()).getName() + "__: " + c.getName())
-								.collect(Collectors.joining("\n"));
-						event
-								.getHook()
+								.map(entry -> {
+									final long restaurantId = entry.getKey();
+									final String restaurantName = this.restaurantTable.byId(restaurantId).getName();
+
+									final String sections = entry.getValue()
+											.stream()
+											.map(section -> "* " + section.getName())
+											.collect(Collectors.joining("\n"));
+
+									return "__" + restaurantName + "__\n" + sections;
+								})
+								.collect(Collectors.joining("\n\n"));
+
+						event.getHook()
 								.sendMessage("**Your restaurants:**\n" + (msg == null || msg.isBlank() ? "*No content*" : msg))
 								.setEphemeral(true)
 								.queue();
@@ -117,49 +129,44 @@ public class SelectCmd implements SlashCommandExecutor {
 		private TargetRestaurantView targetRestaurantView;
 
 		@Override
-		public void execute(SlashCommandInteractionEvent event) {
+		public void execute(final SlashCommandInteractionEvent event) {
 			event.deferReply(true).queue();
 			final String restaurantName = event.getOption("restaurant").getAsString();
-			restaurantTable.byName(restaurantName).ifPresentOrElse(restaurant -> {
-				final DiscordPlatformData discordPlatformData = discordPlatformTable
+			this.restaurantTable.byName(restaurantName).ifPresentOrElse(restaurant -> {
+				final DiscordPlatformData discordPlatformData = this.discordPlatformTable
 						.byServer(event.isFromGuild() ? event.getGuild().getIdLong() : event.getChannelIdLong())
 						.orElseGet(() -> {
-							final TargetData targetData = targetTable
-									.insertAndReload(new TargetData(TargetPlatform.DISCORD,
-											new ArrayList<>(Arrays
-													.asList(DayOfWeek.MONDAY,
-															DayOfWeek.TUESDAY,
-															DayOfWeek.WEDNESDAY,
-															DayOfWeek.THURSDAY,
-															DayOfWeek.FRIDAY))));
-							return discordPlatformTable
-									.insertAndReload(new DiscordPlatformData(targetData.getId(),
-											event.isFromGuild() ? event.getGuild().getId() : event.getChannelId(),
-											event.isFromGuild() ? event.getChannelId() : event.getUser().getId(), null,
-											!event.isFromGuild()));
+							final TargetData targetData = this.targetTable.insertAndReload(new TargetData(TargetPlatform.DISCORD,
+									new ArrayList<>(Arrays.asList(DayOfWeek.MONDAY,
+											DayOfWeek.TUESDAY,
+											DayOfWeek.WEDNESDAY,
+											DayOfWeek.THURSDAY,
+											DayOfWeek.FRIDAY))));
+							return this.discordPlatformTable.insertAndReload(new DiscordPlatformData(targetData.getId(),
+									event.isFromGuild() ? event.getGuild().getId() : event.getChannelId(),
+									event.isFromGuild() ? event.getChannelId() : event.getUser().getId(),
+									null,
+									!event.isFromGuild()));
 						});
 
-				targetRestaurantSectionTable
-						.byTarget(discordPlatformData.getId())
+				this.targetRestaurantSectionTable.byTarget(discordPlatformData.getId())
 						.stream()
 						.map(TargetRestaurantSectionData::getRestaurantSectionId)
-						.map(restaurantSectionTable::byId)
+						.map(this.restaurantSectionTable::byId)
 						.filter(c -> c.getRestaurantId() == restaurant.getId())
-						.forEach(c -> targetRestaurantSectionTable
+						.forEach(c -> this.targetRestaurantSectionTable
 								.deleteIfExists(new TargetRestaurantSectionData(discordPlatformData.getId(), c.getId())));
 
-				final List<RestaurantSectionData> restaurantSections = targetRestaurantSectionTable
+				final List<RestaurantSectionData> restaurantSections = this.targetRestaurantSectionTable
 						.byTarget(discordPlatformData.getId())
 						.stream()
-						.map(c -> restaurantSectionTable.byId(c.getRestaurantSectionId()))
-						.sorted((a, b) -> Long.compare(a.getRestaurantId(), b.getRestaurantId()))
+						.map(c -> this.restaurantSectionTable.byId(c.getRestaurantSectionId()))
+						.sorted(Comparator.comparing(RestaurantSectionData::getRestaurantId))
 						.toList();
-				final String msg = restaurantSections
-						.stream()
-						.map(c -> "* __" + restaurantTable.byId(c.getRestaurantId()).getName() + "__: " + c.getName())
+				final String msg = restaurantSections.stream()
+						.map(c -> "* __" + this.restaurantTable.byId(c.getRestaurantId()).getName() + "__: " + c.getName())
 						.collect(Collectors.joining("\n"));
-				event
-						.getHook()
+				event.getHook()
 						.sendMessage("**Your restaurants:**\n" + (msg == null || msg.isBlank() ? "*No content*" : msg))
 						.setEphemeral(true)
 						.queue();
@@ -169,20 +176,13 @@ public class SelectCmd implements SlashCommandExecutor {
 		}
 
 		@Override
-		public void complete(CommandAutoCompleteInteractionEvent event) {
-			discordPlatformTable
-					.byServer(event.isFromGuild() ? event.getGuild().getIdLong() : event.getChannelIdLong())
-					.ifPresentOrElse(
-							discordPlatformData -> event
-									.replyChoiceStrings(targetRestaurantView
-											.likeName(event.getFocusedOption().getValue(),
-													OptionData.MAX_CHOICES,
-													discordPlatformData.getId())
-											.stream()
-											.map(TargetRestaurantROData::getName)
-											.toList())
-									.queue(),
-							() -> event.replyChoiceStrings("No results.").queue());
+		public void complete(final CommandAutoCompleteInteractionEvent event) {
+			this.discordPlatformTable.byServer(event.isFromGuild() ? event.getGuild().getIdLong() : event.getChannelIdLong())
+					.ifPresentOrElse(discordPlatformData -> event.replyChoiceStrings(this.targetRestaurantView
+							.likeName(event.getFocusedOption().getValue(), OptionData.MAX_CHOICES, discordPlatformData.getId())
+							.stream()
+							.map(TargetRestaurantROData::getName)
+							.toList()).queue(), () -> event.replyChoiceStrings("No results.").queue());
 		}
 
 		@Override
@@ -221,44 +221,39 @@ public class SelectCmd implements SlashCommandExecutor {
 		private RestaurantSectionSelectMenu restaurantSectionSelectMenu;
 
 		@Override
-		public void execute(SlashCommandInteractionEvent event) {
+		public void execute(final SlashCommandInteractionEvent event) {
 			event.deferReply(true).queue();
 			final String restaurantName = event.getOption("restaurant").getAsString();
-			restaurantTable.byName(restaurantName).ifPresentOrElse(restaurant -> {
-				final DiscordPlatformData discordPlatformData = discordPlatformTable
+			this.restaurantTable.byName(restaurantName).ifPresentOrElse(restaurant -> {
+				final DiscordPlatformData discordPlatformData = this.discordPlatformTable
 						.byServer(event.isFromGuild() ? event.getGuild().getIdLong() : event.getChannelIdLong())
 						.orElseGet(() -> {
-							final TargetData targetData = targetTable
-									.insertAndReload(new TargetData(TargetPlatform.DISCORD,
-											new ArrayList<>(Arrays
-													.asList(DayOfWeek.MONDAY,
-															DayOfWeek.TUESDAY,
-															DayOfWeek.WEDNESDAY,
-															DayOfWeek.THURSDAY,
-															DayOfWeek.FRIDAY))));
-							return discordPlatformTable
-									.insertAndReload(new DiscordPlatformData(targetData.getId(),
-											event.isFromGuild() ? event.getGuild().getId() : event.getChannelId(),
-											event.isFromGuild() ? event.getChannelId() : event.getUser().getId(), null,
-											!event.isFromGuild()));
+							final TargetData targetData = this.targetTable.insertAndReload(new TargetData(TargetPlatform.DISCORD,
+									new ArrayList<>(Arrays.asList(DayOfWeek.MONDAY,
+											DayOfWeek.TUESDAY,
+											DayOfWeek.WEDNESDAY,
+											DayOfWeek.THURSDAY,
+											DayOfWeek.FRIDAY))));
+							return this.discordPlatformTable.insertAndReload(new DiscordPlatformData(targetData.getId(),
+									event.isFromGuild() ? event.getGuild().getId() : event.getChannelId(),
+									event.isFromGuild() ? event.getChannelId() : event.getUser().getId(),
+									null,
+									!event.isFromGuild()));
 						});
 
-				final List<Long> restaurantSectionDatas = targetRestaurantSectionTable
-						.byTarget(discordPlatformData.getId())
+				final List<Long> restaurantSectionDatas = this.targetRestaurantSectionTable.byTarget(discordPlatformData.getId())
 						.stream()
 						.map(TargetRestaurantSectionData::getRestaurantSectionId)
 						.toList();
 
-				if (restaurantSectionTable.countUniques(new RestaurantSectionData(restaurant.getId(), null)) > 0) {
-					event
-							.getHook()
+				if (this.restaurantSectionTable.countUniques(new RestaurantSectionData(restaurant.getId(), null)) > 0) {
+					event.getHook()
 							.sendMessage("Restaurant __" + restaurantName + "__:")
 							.setEphemeral(true)
-							.addComponents(ActionRow.of(restaurantSectionSelectMenu.build(restaurant, restaurantSectionDatas)))
+							.addComponents(ActionRow.of(this.restaurantSectionSelectMenu.build(restaurant, restaurantSectionDatas)))
 							.queue();
 				} else {
-					event
-							.getHook()
+					event.getHook()
 							.sendMessage("Restaurant __" + restaurantName + "__: *Doesn't serve anything ?*")
 							.setEphemeral(true)
 							.queue();
@@ -269,14 +264,11 @@ public class SelectCmd implements SlashCommandExecutor {
 		}
 
 		@Override
-		public void complete(CommandAutoCompleteInteractionEvent event) {
-			event
-					.replyChoiceStrings(restaurantTable
-							.likeName(event.getFocusedOption().getValue(), OptionData.MAX_CHOICES)
-							.stream()
-							.map(RestaurantData::getName)
-							.toList())
-					.queue();
+		public void complete(final CommandAutoCompleteInteractionEvent event) {
+			event.replyChoiceStrings(this.restaurantTable.likeName(event.getFocusedOption().getValue(), OptionData.MAX_CHOICES)
+					.stream()
+					.map(RestaurantData::getName)
+					.toList()).queue();
 		}
 
 		@Override

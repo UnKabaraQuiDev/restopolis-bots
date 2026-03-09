@@ -71,8 +71,7 @@ public class DiscordSchedule {
 					return;
 				}
 
-				final DiscordPlatformData discordPlatformData = discordPlatformTable
-						.loadIfExists(new DiscordPlatformData(target.getId()))
+				final DiscordPlatformData discordPlatformData = discordPlatformTable.loadIfExists(new DiscordPlatformData(target.getId()))
 						.orElse(null);
 				if (discordPlatformData == null) {
 					return;
@@ -94,8 +93,7 @@ public class DiscordSchedule {
 				if (targetRestaurantSectionDatas.isEmpty()) {
 					return;
 				}
-				final List<RestaurantSectionData> restaurantSectionDatas = targetRestaurantSectionDatas
-						.stream()
+				final List<RestaurantSectionData> restaurantSectionDatas = targetRestaurantSectionDatas.stream()
 						.map(c -> restaurantSectionTable.byId(c.getRestaurantSectionId()))
 						.toList();
 
@@ -104,24 +102,20 @@ public class DiscordSchedule {
 				restaurantSectionDatas.forEach(restaurantSectionData -> {
 					final RestaurantData restaurantData = restaurantTable.byId(restaurantSectionData.getRestaurantId());
 					final MealData mealData = mealTable.todayByRestaurant(restaurantSectionData.getRestaurantId());
-					final MealSectionData mealSectionData = mealSectionTable
-							.byMealAndRestaurantSection(mealData.getId(), restaurantSectionData.getId());
+					final MealSectionData mealSectionData = mealSectionTable.byMealAndRestaurantSection(mealData.getId(),
+							restaurantSectionData.getId());
 
 					map.computeIfAbsent(restaurantData, k -> new HashMap<>());
 					map.get(restaurantData).put(restaurantSectionData, mealSectionData);
 				});
 
-				String msg = buildMessage(map
-						.entrySet()
+				String msg = buildMessage(map.entrySet()
 						.stream()
-						.collect(Collectors
-								.toMap(e -> e.getKey().getName(),
-										e -> e
-												.getValue()
-												.entrySet()
-												.stream()
-												.collect(
-														Collectors.toMap(e2 -> e2.getKey().getName(), e2 -> e2.getValue().getContent())))));
+						.collect(Collectors.toMap(e -> e.getKey().getName(),
+								e -> e.getValue()
+										.entrySet()
+										.stream()
+										.collect(Collectors.toMap(e2 -> e2.getKey().getName(), e2 -> e2.getValue().getContent())))));
 
 				if (role != null) {
 					msg = role.getAsMention() + "\n" + msg;
@@ -153,7 +147,7 @@ public class DiscordSchedule {
 	}
 
 	private int index = 0;
-	private final String[] messages = { "Yum yum", "Blergh", "Mew >:3c", "Ratin' good foog" };
+	private final String[] messages = { "Yum yum", "Blergh", "Mew >:3c", "Ratin' good foog", "/help" };
 
 	@Scheduled(fixedRate = 60000)
 	public void changeActivity() {
